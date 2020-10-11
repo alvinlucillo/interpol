@@ -44,7 +44,6 @@ class Token:
 
     def is_math_operator(self):
         keyword = self.get_keyword(self.value)
-
         return keyword is not None and 20 <= keyword.value <= 29
 
 
@@ -54,8 +53,8 @@ class LexicalAnalyzer:
         self.index = -1
         self.char = None
 
+    # Move to next character
     def next_char(self):
-
         if (self.index + 1) < len(self.code):
             self.index += 1
             self.char = self.code[self.index]
@@ -68,6 +67,7 @@ class LexicalAnalyzer:
 
         return self.char
 
+    # Move to next token
     def next_token(self):
         token = None
 
@@ -111,6 +111,9 @@ class LexicalAnalyzer:
             elif self.char == "\n":
                 token = Token(TokenType.NEWLINE, self.char)
 
+            else:
+                self.throw_error()
+
             # Returns token when it is already created
             if token is not None:
                 return token
@@ -118,7 +121,10 @@ class LexicalAnalyzer:
     # Returns characters before any whitespace
     def advance_chars(self, delimiter=None):
         start_pos = self.index
-        while self.next_char() is not None and not self.char.isspace() and not self.char == delimiter:
+        while self.next_char() is not None and \
+                ((not self.char.isspace() and delimiter is None) or
+                 (self.char.isspace() and delimiter == "\"" or not self.char.isspace() and delimiter == "\""))\
+                and not self.char == delimiter:
             pass
 
         if self.char is not None and self.char.isspace():
@@ -126,9 +132,9 @@ class LexicalAnalyzer:
 
         return self.code[start_pos: self.index + 1]
 
-    # Returns true if char is in printable ASCII chart
+    # Returns true if char is in printable ASCII chart except for tab
     def is_printable_ascii_char(self):
-        return 32 <= ord(self.char) <= 126
+        return 32 <= ord(self.char) <= 126 or 9 <= ord(self.char) <= 10
 
     def throw_error(self):
         raise LexerError
@@ -183,6 +189,8 @@ class TokenAnalyzer:
                     self.print()
                 elif self.token.is_math_operator():
                     self.math_operation()
+                else:
+                    raise ParserError
 
         except LexerError as e:
             print(str(e))
@@ -225,8 +233,12 @@ class TokenAnalyzer:
     def comment(self):
         self.print_correct_syntax()
 
-    @staticmethod
-    def end():
+    def end(self):
+        self.get_remaining_tokens()
+
+        if len(self.remaining_tokens) > 0:
+            raise ParserError
+
         print("Thank you for using the syntax checker.")
 
     def get_remaining_tokens(self):
@@ -238,17 +250,17 @@ class TokenAnalyzer:
         print("The syntax is correct.")
 
 
-class Main:
-    @staticmethod
-    def main():
-        welcome_message = "INTERPOL Syntax Checker\nInput BEGIN to begin. Input END to end."
-        print(welcome_message)
+def main():
+    welcome_message = "INTERPOL Syntax Checker\nInput BEGIN to begin. Input END to end."
+    print(welcome_message)
 
-        parser = TokenAnalyzer(LexicalAnalyzer(input()))
+    parser = TokenAnalyzer(LexicalAnalyzer(input()))
 
-        while parser.evaluate():
-            parser.set_lexer(LexicalAnalyzer(input()))
+    # Continue to ask for input until END is entered
+    while parser.evaluate():
+        parser.set_lexer(LexicalAnalyzer(input()))
 
 
-# Execute INTERPOL program
-Main.main()
+# Execute INTERPOL program automatically if running the module itself
+if __name__ == '__main__':
+    main()
