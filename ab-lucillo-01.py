@@ -121,6 +121,7 @@ class LexicalAnalyzer:
     # Returns characters before any whitespace
     def advance_chars(self, delimiter=None):
         start_pos = self.index
+        # Continue until EOL, delimiter is reached or space is reached
         while self.next_char() is not None and \
                 ((not self.char.isspace() and delimiter is None) or
                  (self.char.isspace() and delimiter == "\"" or not self.char.isspace() and delimiter == "\""))\
