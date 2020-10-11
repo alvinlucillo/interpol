@@ -127,7 +127,7 @@ class LexicalAnalyzer:
                  (self.char.isspace() and delimiter == "\"" or not self.char.isspace() and delimiter == "\""))\
                 and not self.char == delimiter:
             pass
-
+        # If loop above terminates due to space, move back cursor to last non-space char
         if self.char is not None and self.char.isspace():
             self.index -= 1
 
@@ -160,7 +160,6 @@ class TokenAnalyzer:
         self.token = None
         self.analyzer_started = False
         self.remaining_tokens = []
-        self.terminate = False
 
     def set_lexer(self, _lexer):
         self.lexer = _lexer
@@ -242,6 +241,7 @@ class TokenAnalyzer:
 
         print("Thank you for using the syntax checker.")
 
+    # Retrieves all remaining token
     def get_remaining_tokens(self):
         while self.next_token() is not None:
             self.remaining_tokens.append(self.token)
