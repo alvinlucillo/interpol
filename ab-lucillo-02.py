@@ -39,12 +39,15 @@ class Token:
                 return tokenType
         return None
 
-    def is_type(self, _type):
-        return self.type == _type
+    def is_type(self, _type): return self.type == _type
 
     def is_math_operator(self):
         keyword = self.get_keyword(self.value)
         return keyword is not None and 20 <= keyword.value <= 29
+
+    def get_type(self): return self.type
+
+    def get_value(self): return self.value
 
 
 class LexicalAnalyzer:
@@ -206,10 +209,8 @@ class TokenAnalyzer:
             raise ParserError
 
         if not self.analyzer_started:
-            print("The syntax is correct. Beginning syntax checker.")
+            print("Starting program")
             self.analyzer_started = True
-        else:
-            self.print_correct_syntax()
 
         return True
 
@@ -218,17 +219,34 @@ class TokenAnalyzer:
 
         if not (len(self.remaining_tokens) == 1 and self.remaining_tokens[0].is_type(TokenType.STRING)):
             raise ParserError
-        else:
-            self.print_correct_syntax()
+
+        print(self.token.get_value())
 
     def math_operation(self):
+        token_type = self.token.get_type()
         self.get_remaining_tokens()
 
-        if len(self.remaining_tokens) == 2 and \
-                self.remaining_tokens[0].is_type(TokenType.INT) and self.remaining_tokens[1].is_type(TokenType.INT):
-            self.print_correct_syntax()
-        else:
+        if not(len(self.remaining_tokens) == 2 and
+               self.remaining_tokens[0].is_type(TokenType.INT) and self.remaining_tokens[1].is_type(TokenType.INT)):
             raise ParserError
+
+        value1 = int(self.remaining_tokens[0].get_value())
+        value2 = int(self.remaining_tokens[1].get_value())
+
+        if token_type == TokenType.ADD:
+            print(value1 + value2)
+        elif token_type == TokenType.SUB:
+            print(value1 - value2)
+        elif token_type == TokenType.MUL:
+            print(value1 * value2)
+        elif token_type == TokenType.DIV or token_type == TokenType.MOD:
+            if value2 == 0:
+                raise ParserError("Error: Division by zero")
+
+            if token_type == TokenType.DIV:
+                print(value1 / value2)
+            else:
+                print(value1 % value2)
 
     def comment(self):
         self.print_correct_syntax()
@@ -239,7 +257,7 @@ class TokenAnalyzer:
         if len(self.remaining_tokens) > 0:
             raise ParserError
 
-        print("Thank you for using the syntax checker.")
+        print("Ending program.")
 
     # Retrieves all remaining token
     def get_remaining_tokens(self):
@@ -252,7 +270,7 @@ class TokenAnalyzer:
 
 
 def main():
-    welcome_message = "INTERPOL Syntax Checker\nInput BEGIN to begin. Input END to end."
+    welcome_message = "INTERPOL Compiler\nInput BEGIN to begin. Input END to end."
     print(welcome_message)
 
     parser = TokenAnalyzer(LexicalAnalyzer(input()))
