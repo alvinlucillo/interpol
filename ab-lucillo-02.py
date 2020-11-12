@@ -96,6 +96,8 @@ class LexicalAnalyzer:
                 if not (len(text) > 1 and text[0] == '\"' and text[len(text) - 1] == '\"'):
                     self.throw_error()
 
+                text = text[1:len(text)-1]
+
                 token = Token(TokenType.STRING, text)
 
             # If first char is numeric, it can be an integer
@@ -127,7 +129,7 @@ class LexicalAnalyzer:
         # Continue until EOL, delimiter is reached or space is reached
         while self.next_char() is not None and \
                 ((not self.char.isspace() and delimiter is None) or
-                 (self.char.isspace() and delimiter == "\"" or not self.char.isspace() and delimiter == "\""))\
+                 (delimiter is not None))\
                 and not self.char == delimiter:
             pass
         # If loop above terminates due to space, move back cursor to last non-space char
@@ -180,7 +182,7 @@ class TokenAnalyzer:
 
             if self.token is not None:
                 if self.token.is_type(TokenType.COMMENT):
-                    self.comment()
+                    pass
                 elif self.token.is_type(TokenType.BEGIN):
                     self.begin()
                 elif self.token.is_type(TokenType.END):
@@ -215,12 +217,16 @@ class TokenAnalyzer:
         return True
 
     def print(self):
+        token_type = self.token.get_type()
         self.get_remaining_tokens()
 
         if not (len(self.remaining_tokens) == 1 and self.remaining_tokens[0].is_type(TokenType.STRING)):
             raise ParserError
 
-        print(self.token.get_value())
+        if token_type == TokenType.PRINT:
+            print(self.remaining_tokens[0].get_value())
+        else:
+            print(self.remaining_tokens[0].get_value() + "\n")
 
     def math_operation(self):
         token_type = self.token.get_type()
@@ -247,9 +253,6 @@ class TokenAnalyzer:
                 print(value1 / value2)
             else:
                 print(value1 % value2)
-
-    def comment(self):
-        self.print_correct_syntax()
 
     def end(self):
         self.get_remaining_tokens()
