@@ -176,33 +176,7 @@ class TokenAnalyzer:
         return self.token
 
     def evaluate(self):
-
-        try:
-            self.next_token()
-
-            if self.token is not None:
-                if self.token.is_type(TokenType.COMMENT):
-                    pass
-                elif self.token.is_type(TokenType.BEGIN):
-                    self.begin()
-                elif self.token.is_type(TokenType.END):
-                    self.end()
-                    return False
-                elif not self.analyzer_started:
-                    raise ParserError
-                elif self.token.is_type(TokenType.PRINT) or self.token.is_type(TokenType.PRINTLN):
-                    self.print()
-                elif self.token.is_math_operator():
-                    self.math_operation()
-                else:
-                    raise ParserError
-
-        except LexerError as e:
-            print(str(e))
-        except ParserError as e:
-            print(str(e))
-
-        return True
+        pass
 
     def begin(self):
         self.get_remaining_tokens()
@@ -273,15 +247,14 @@ class TokenAnalyzer:
 
 
 def main():
-    welcome_message = "INTERPOL Compiler\nInput BEGIN to begin. Input END to end."
+    welcome_message = "========  INTERPOL INTERPRETER STARTED   ========\n"
     print(welcome_message)
 
     parser = TokenAnalyzer(LexicalAnalyzer(input()))
 
-    # Continue to ask for input until END is entered
-    while parser.evaluate():
-        parser.set_lexer(LexicalAnalyzer(input()))
+    file = input("Enter INTERPOL file (.ipol): ")
 
+    print(file)
 
 # Execute INTERPOL program automatically if running the module itself
 if __name__ == '__main__':
