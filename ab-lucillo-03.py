@@ -2,59 +2,80 @@ from enum import Enum
 
 
 class TokenType(Enum):
-    # Data types
-    INT = 0
+    # Data type
+    NUMBER = 0
     STRING = 1
-    # User identifiers
-    IDENTIFIER = 10
-    # Math operators
-    ADD = 20
-    SUB = 21
-    MUL = 22
-    DIV = 23
-    MOD = 24
-    # Other identifiers
-    BEGIN = 30
-    END = 31
-    PRINT = 32
-    PRINTLN = 33
-    # Delimiter
-    NEWLINE = 40
-    # Comment
-    COMMENT = 50
+    # Identifier
+    IDENTIFIER = 6
+    # Scope
+    PROGRAM_BEGIN = 11
+    PROGRAM_END = 12
+    END_OF_STATEMENT = 13
+    END_OF_FILE = 14
+    # Declaration
+    DECLARATION_STRING = 16
+    DECLARATION_INT = 17
+    DECLARATION_ASSIGN_WITH_KEY = 18
+    ASSIGN_KEY = 19
+    ASSIGN_VAR_KEY = 20
+    # Input output
+    INPUT = 21
+    OUTPUT = 22
+    OUTPUT_WITH_LINE = 23
+    # Basic math operation
+    BASIC_OPERATOR_ADD = 26
+    BASIC_OPERATOR_SUB = 27
+    BASIC_OPERATOR_MUL = 28
+    BASIC_OPERATOR_DIV = 29
+    BASIC_OPERATOR_MOD = 30
+    # Advanced math operation
+    ADVANCED_OPERATOR_EXP = 31
+    ADVANCED_OPERATOR_ROOT = 32
+    ADVANCED_OPERATOR_AVE = 33
+    ADVANCED_OPERATOR_DIST = 34
+    DISTANCE_SEPARATOR = 35
+
+
+keywords = ["BEGIN", "END", "VARSTR", "VARINT",
+            "WITH", "STORE", "IN",  "INPUT",
+            "PRINT", "PRINTLN", "ADD", "SUB",
+            "MUL", "DIV", "MOD", "RAISE",
+            "ROOT", "MEAN", "DIST", "AND"];
+
+types = [11, 12, 16, 17,
+         18, 19, 20, 21,
+         22, 23, 26, 27,
+         28, 29, 30, 31,
+         32, 33, 34, 35]
 
 
 class Token:
-    def __init__(self, _type, _value):
+    def __init__(self, _type, _value, _line):
         self.type = _type
         self.value = _value
-
-    def __str__(self):
-        return str(str(self.type) + ":" + self.value)
+        self.line = _line
 
     @staticmethod
-    def get_keyword(text):
-        for tokenType in TokenType:
-            if tokenType.name == text and 20 <= tokenType.value <= 39:
-                return tokenType
+    def get_token_type(_type):
+        for i, typ in enumerate(keywords):
+            if typ == _type:
+                return TokenType(types[i])
         return None
 
-    def is_type(self, _type): return self.type == _type
-
-    def is_math_operator(self):
-        keyword = self.get_keyword(self.value)
-        return keyword is not None and 20 <= keyword.value <= 29
+    def is_arithmetic_operator(self):
+        return TokenType.BASIC_OPERATOR_ADD <= self.type <= TokenType.ADVANCED_OPERATOR_DIST
 
     def get_type(self): return self.type
 
     def get_value(self): return self.value
 
 
-class LexicalAnalyzer:
+class Lexer:
     def __init__(self, _code):
         self.code = _code
         self.index = -1
         self.char = None
+        self.line = 1
 
     # Move to next character
     def next_char(self):
@@ -82,39 +103,38 @@ class LexicalAnalyzer:
             # If first char is alphabetic, it can be a keyword
             elif self.char.isalpha():
                 text = self.advance_chars()
-                token_type = Token.get_keyword(text)
+                token_type = Token.get_token_type(text)
 
-                if text.isalpha() and text.isupper():
-                    token = Token(token_type, text)
+                if token_type is not None:
+                    token = Token(token_type, text, self.line)
+                elif text.isalpha() and len(text) < 50 and text[0].islower():
+                    token = Token(TokenType.IDENTIFIER, text, self.line)
                 else:
                     self.throw_error()
 
             # If the first char is double quotes, it can be a string
-            elif self.char == '\"':
-                text = self.advance_chars("\"")
+            elif self.char == '[':
+                text = self.advance_chars(']')
 
-                if not (len(text) > 1 and text[0] == '\"' and text[len(text) - 1] == '\"'):
+                if not (len(text) > 1 and text[0] == '[' and text[len(text) - 1] == ']'):
                     self.throw_error()
 
                 text = text[1:len(text)-1]
 
-                token = Token(TokenType.STRING, text)
+                token = Token(TokenType.STRING, text, self.line)
 
             # If first char is numeric, it can be an integer
             elif self.char.isdigit():
                 text = self.advance_chars()
                 if text.isdigit():
-                    token = Token(TokenType.INT, text)
+                    token = Token(TokenType.NUMBER, text, self.line)
                 else:
                     self.throw_error()
 
-            # If first char is #, it is a comment
-            elif self.char == "#":
-                token = Token(TokenType.COMMENT, self.code)
-
             # Delimiter
             elif self.char == "\n":
-                token = Token(TokenType.NEWLINE, self.char)
+                token = Token(TokenType.END_OF_STATEMENT, "EOS", self.line)
+                self.line += 1
 
             else:
                 self.throw_error()
@@ -122,6 +142,11 @@ class LexicalAnalyzer:
             # Returns token when it is already created
             if token is not None:
                 return token
+
+        self.line += 1
+        token = Token(TokenType.END_OF_FILE, "EOF", self.line)
+
+        return token
 
     # Returns characters before any whitespace
     def advance_chars(self, delimiter=None):
@@ -142,8 +167,72 @@ class LexicalAnalyzer:
     def is_printable_ascii_char(self):
         return 32 <= ord(self.char) <= 126 or 9 <= ord(self.char) <= 10
 
-    def throw_error(self):
+    def throw_error(self, token):
         raise LexerError
+
+
+class Parser:
+    def __init__(self, _lexer):
+        self.lexer = _lexer
+        self.token = None
+        self.tokens = []
+
+    def get_tokens(self):
+        return self.tokens
+
+    def next_token(self):
+        self.token = self.lexer.next_token()
+
+        if self.token is not None:
+            self.tokens.append(self.token)
+
+        return self.token
+
+    def execute(self):
+        while self.next_token() is not TokenType.END_OF_FILE:
+            if self.token.type is TokenType.OUTPUT:
+                self.print()
+
+    def evaluate_expression(self):
+        if self.token.type == TokenType.BASIC_OPERATOR_ADD:
+            self.add()
+        return ""
+
+    def add(self):
+        self.next_token()
+
+        operand1 = self.get_literal_identifier_value()
+        if operand1 is None:
+            if self.token.is_arithmetic_operator():
+                operand1 = self.evaluate_expression()
+
+        self.next_token()
+
+        operand2 = self.get_literal_identifier_value()
+        if operand2 is None:
+            if self.token.is_arithmetic_operator():
+                operand2 = self.evaluate_expression()
+
+        return operand1 + operand2
+
+    def print(self):
+        self.next_token()
+
+        value = self.get_literal_identifier_value()
+        if value is None:
+            if self.token.is_arithmetic_operator():
+                value = self.evaluate_expression()
+
+        print(value)
+
+    def get_literal_identifier_value(self):
+        value = None
+        if self.token.type == TokenType.STRING or self.token.type == TokenType.NUMBER:
+            value = self.token.value
+        elif self.token.type == TokenType.IDENTIFIER:
+            pass
+
+        return value
 
 
 class LexerError(Exception):
@@ -158,103 +247,32 @@ class ParserError(Exception):
         super().__init__(self.message)
 
 
-class TokenAnalyzer:
-
-    def __init__(self, _lexer):
-        self.lexer = _lexer
-        self.token = None
-        self.analyzer_started = False
-        self.remaining_tokens = []
-
-    def set_lexer(self, _lexer):
-        self.lexer = _lexer
-        self.token = None
-        self.remaining_tokens = []
-
-    def next_token(self):
-        self.token = self.lexer.next_token()
-        return self.token
-
-    def evaluate(self):
-        pass
-
-    def begin(self):
-        self.get_remaining_tokens()
-
-        if len(self.remaining_tokens) > 0:
-            raise ParserError
-
-        if not self.analyzer_started:
-            print("Starting program")
-            self.analyzer_started = True
-
-        return True
-
-    def print(self):
-        token_type = self.token.get_type()
-        self.get_remaining_tokens()
-
-        if not (len(self.remaining_tokens) == 1 and self.remaining_tokens[0].is_type(TokenType.STRING)):
-            raise ParserError
-
-        if token_type == TokenType.PRINT:
-            print(self.remaining_tokens[0].get_value())
-        else:
-            print(self.remaining_tokens[0].get_value() + "\n")
-
-    def math_operation(self):
-        token_type = self.token.get_type()
-        self.get_remaining_tokens()
-
-        if not(len(self.remaining_tokens) == 2 and
-               self.remaining_tokens[0].is_type(TokenType.INT) and self.remaining_tokens[1].is_type(TokenType.INT)):
-            raise ParserError
-
-        value1 = int(self.remaining_tokens[0].get_value())
-        value2 = int(self.remaining_tokens[1].get_value())
-
-        if token_type == TokenType.ADD:
-            print(value1 + value2)
-        elif token_type == TokenType.SUB:
-            print(value1 - value2)
-        elif token_type == TokenType.MUL:
-            print(value1 * value2)
-        elif token_type == TokenType.DIV or token_type == TokenType.MOD:
-            if value2 == 0:
-                raise ParserError("Error: Division by zero")
-
-            if token_type == TokenType.DIV:
-                print(value1 / value2)
-            else:
-                print(value1 % value2)
-
-    def end(self):
-        self.get_remaining_tokens()
-
-        if len(self.remaining_tokens) > 0:
-            raise ParserError
-
-        print("Ending program.")
-
-    # Retrieves all remaining token
-    def get_remaining_tokens(self):
-        while self.next_token() is not None:
-            self.remaining_tokens.append(self.token)
-
-    @staticmethod
-    def print_correct_syntax():
-        print("The syntax is correct.")
-
-
 def main():
     welcome_message = "========  INTERPOL INTERPRETER STARTED   ========\n"
+    output_message = "================ INTERPOL OUTPUT ================\n"
+    token_list_header = "========= INTERPOL LEXEMES/TOKENS TABLE =========\n"
+    token_list_columns = "LINE NO.  TOKENS                          LEXEMES"
+
     print(welcome_message)
 
-    parser = TokenAnalyzer(LexicalAnalyzer(input()))
+    # file_path = input("Enter INTERPOL file (.ipol): ")
+    file_path = "C:\\Users\\Alvin Lucillo\\PycharmProjects\\interpol\\venv\\test1.ipol"
+    file = open(file_path, 'r')
+    contents = file.read()
 
-    file = input("Enter INTERPOL file (.ipol): ")
+    print(output_message)
 
-    print(file)
+    lexer = Lexer(contents)
+    parser = Parser(lexer)
+
+    parser.execute()
+
+    print(token_list_header)
+    print(token_list_columns)
+
+    for token in parser.get_tokens():
+        print(str(token.line).ljust(10) + TokenType(token.type).name.ljust(32) + token.value)
+
 
 # Execute INTERPOL program automatically if running the module itself
 if __name__ == '__main__':
