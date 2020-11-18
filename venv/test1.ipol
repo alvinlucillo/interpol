@@ -1,3 +1,5 @@
 BEGIN
 ADD 1
+PRINTLN [Hello world]
+PRINT ADD 1 ADD 1 2
 END

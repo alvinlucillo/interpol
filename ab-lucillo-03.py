@@ -1,4 +1,5 @@
 from enum import Enum
+import math
 
 
 class TokenType(Enum):
@@ -63,7 +64,10 @@ class Token:
         return None
 
     def is_arithmetic_operator(self):
-        return TokenType.BASIC_OPERATOR_ADD <= self.type <= TokenType.ADVANCED_OPERATOR_DIST
+        return TokenType.BASIC_OPERATOR_ADD.value <= self.type.value <= TokenType.ADVANCED_OPERATOR_DIST.value
+
+    def has_two_operators(self):
+        return TokenType.BASIC_OPERATOR_ADD.value <= self.type.value <= TokenType.ADVANCED_OPERATOR_ROOT
 
     def get_type(self): return self.type
 
@@ -189,16 +193,20 @@ class Parser:
         return self.token
 
     def execute(self):
-        while self.next_token() is not TokenType.END_OF_FILE:
-            if self.token.type is TokenType.OUTPUT:
-                self.print()
+        while self.next_token().type is not TokenType.END_OF_FILE:
+            if self.token.type is TokenType.OUTPUT or self.token.type is TokenType.OUTPUT_WITH_LINE:
+                if self.token.type is TokenType.OUTPUT:
+                    self.print("")
+                else:
+                    self.print("\n")
 
     def evaluate_expression(self):
-        if self.token.type == TokenType.BASIC_OPERATOR_ADD:
-            self.add()
-        return ""
+        if self.token.has_two_operators():
+            return self.two_operators_arithmetic()
 
-    def add(self):
+        return None
+
+    def two_operators_arithmetic(self):
         self.next_token()
 
         operand1 = self.get_literal_identifier_value()
@@ -213,9 +221,20 @@ class Parser:
             if self.token.is_arithmetic_operator():
                 operand2 = self.evaluate_expression()
 
-        return operand1 + operand2
+        if self.token == TokenType.BASIC_OPERATOR_ADD:
+            return operand1 + operand2
+        if self.token == TokenType.BASIC_OPERATOR_SUB:
+            return operand1 - operand2
+        if self.token == TokenType.BASIC_OPERATOR_MUL:
+            return operand1 * operand2
+        if self.token == TokenType.BASIC_OPERATOR_DIV:
+            return operand1 / operand2
+        if self.token == TokenType.BASIC_OPERATOR_MOD:
+            return operand1 % operand2
+        if self.token == TokenType.ADVANCED_OPERATOR_EXP:
+            return math.sqrt()
 
-    def print(self):
+    def print(self, _end):
         self.next_token()
 
         value = self.get_literal_identifier_value()
@@ -223,12 +242,16 @@ class Parser:
             if self.token.is_arithmetic_operator():
                 value = self.evaluate_expression()
 
-        print(value)
+        print(value, end=_end)
 
     def get_literal_identifier_value(self):
         value = None
+
         if self.token.type == TokenType.STRING or self.token.type == TokenType.NUMBER:
             value = self.token.value
+            if value.isnumeric():
+                return int(value)
+
         elif self.token.type == TokenType.IDENTIFIER:
             pass
 
@@ -250,7 +273,9 @@ class ParserError(Exception):
 def main():
     welcome_message = "========  INTERPOL INTERPRETER STARTED   ========\n"
     output_message = "================ INTERPOL OUTPUT ================\n"
-    token_list_header = "========= INTERPOL LEXEMES/TOKENS TABLE =========\n"
+    output_message_start = "----------------  OUTPUT START  ---------------->"
+    output_message_end = "<----------------- OUTPUT END -------------------"
+    token_list_header = "\n\n========= INTERPOL LEXEMES/TOKENS TABLE =========\n"
     token_list_columns = "LINE NO.  TOKENS                          LEXEMES"
 
     print(welcome_message)
@@ -261,6 +286,7 @@ def main():
     contents = file.read()
 
     print(output_message)
+    print(output_message_start)
 
     lexer = Lexer(contents)
     parser = Parser(lexer)
