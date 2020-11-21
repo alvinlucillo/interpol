@@ -212,8 +212,8 @@ class Parser:
 
         variable = self.get_variable(name)
 
-        if not (variable.type == TokenType.NUMBER and str(value).isnumeric()) or \
-                (variable.type == TokenType.STRING and value.isalpha()):
+        if not (variable.type == TokenType.NUMBER and str(value).isnumeric() or \
+                (variable.type == TokenType.STRING and not str(value).isnumeric())):
             raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
 
         variable.value = value
@@ -233,23 +233,35 @@ class Parser:
     def execute(self):
         try:
             while self.next_token().type is not TokenType.END_OF_FILE:
-                if self.token.type is TokenType.OUTPUT or self.token.type is TokenType.OUTPUT_WITH_LINE:
+                if self.token.type is TokenType.PROGRAM_BEGIN:
+                    self.next_token()
+                elif self.token.type is TokenType.OUTPUT or self.token.type is TokenType.OUTPUT_WITH_LINE:
                     if self.token.type is TokenType.OUTPUT:
                         self.print("")
                     else:
                         self.print("\n")
 
-                if self.token.type is TokenType.DECLARATION_INT or self.token.type is TokenType.DECLARATION_STRING:
+                elif self.token.type is TokenType.DECLARATION_INT or self.token.type is TokenType.DECLARATION_STRING:
                     self.assign()
 
-                if self.token.type is TokenType.ASSIGN_KEY:
+                elif self.token.type is TokenType.ASSIGN_KEY:
                     self.store()
+
+                elif self.token.type is TokenType.PROGRAM_END:
+                    self.next_token()
+                    break
+
+                if self.token.type is not TokenType.END_OF_STATEMENT and \
+                        self.next_token().type is not TokenType.END_OF_STATEMENT:
+                    raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no,
+                                           self.get_current_line())
 
                 self.clear_current_line()
 
         except InterpreterError as e:
             print(str(e))
 
+    # Evaluates the expression to reach its value through recursion
     def evaluate_expression(self):
 
         if not (self.token.is_arithmetic_operator() or self.token.type is TokenType.IDENTIFIER or
@@ -262,7 +274,7 @@ class Parser:
             variable = self.get_variable(self.token.value)
             value = variable.value
 
-            if value.isnumeric():
+            if str(value).isnumeric():
                 value = int(value)
 
         if self.token.type is TokenType.NUMBER:
@@ -307,12 +319,11 @@ class Parser:
             value = self.evaluate_expression()
 
             if not (value is not None and
-                ((declaration_type.type is TokenType.DECLARATION_INT and str(value).isnumeric()) or
-                    declaration_type.type is TokenType.DECLARATION_STRING and value.isalpha())):
+                    ((declaration_type.type is TokenType.DECLARATION_INT and str(value).isnumeric()) or
+                        declaration_type.type is TokenType.DECLARATION_STRING and not str(value).isnumeric())):
 
                 raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no,
-                            self.get_current_line())
-
+                                       self.get_current_line())
         elif operator.type is TokenType.END_OF_STATEMENT:
             pass
         else:
@@ -327,23 +338,12 @@ class Parser:
 
     def two_operators_arithmetic(self):
         operator = self.token.type
-        expression1 = self.next_token()
 
-        operand1 = self.get_literal_identifier()
-        if operand1 is None:
-            if self.token.is_arithmetic_operator():
-                operand1 = self.evaluate_expression()
-        elif expression1.type is TokenType.IDENTIFIER:
-            operand1 = operand1.value
+        self.next_token()
+        operand1 = self.evaluate_expression()
 
-        expression2 = self.next_token()
-
-        operand2 = self.get_literal_identifier()
-        if operand2 is None:
-            if self.token.is_arithmetic_operator():
-                operand2 = self.evaluate_expression()
-        elif expression2.type is TokenType.IDENTIFIER:
-            operand2 = operand2.value
+        self.next_token()
+        operand2 = self.evaluate_expression()
 
         if operator == TokenType.BASIC_OPERATOR_ADD:
             return operand1 + operand2
@@ -363,13 +363,7 @@ class Parser:
     def print(self, _end):
         expression = self.next_token()
 
-        value = self.get_literal_identifier()
-
-        if value is None:
-            if self.token.is_arithmetic_operator():
-                value = self.evaluate_expression()
-        elif expression.type is TokenType.IDENTIFIER:
-            value = value.value
+        value = self.evaluate_expression()
 
         print(value, end=_end)
 
