@@ -38,7 +38,7 @@ class TokenType(Enum):
 
 
 keywords = ["BEGIN", "END", "VARSTR", "VARINT",
-            "WITH", "STORE", "IN",  "INPUT",
+            "WITH", "STORE", "IN", "INPUT",
             "PRINT", "PRINTLN", "ADD", "SUB",
             "MUL", "DIV", "MOD", "RAISE",
             "ROOT", "MEAN", "DIST", "AND"];
@@ -51,10 +51,10 @@ types = [11, 12, 16, 17,
 
 
 class Token:
-    def __init__(self, _type, _value, _line):
+    def __init__(self, _type, _value, _line_no):
         self.type = _type
         self.value = _value
-        self.line = _line
+        self.line_no = _line_no
 
     @staticmethod
     def get_token_type(_type):
@@ -67,11 +67,13 @@ class Token:
         return TokenType.BASIC_OPERATOR_ADD.value <= self.type.value <= TokenType.ADVANCED_OPERATOR_DIST.value
 
     def has_two_operators(self):
-        return TokenType.BASIC_OPERATOR_ADD.value <= self.type.value <= TokenType.ADVANCED_OPERATOR_ROOT
+        return TokenType.BASIC_OPERATOR_ADD.value <= self.type.value <= TokenType.ADVANCED_OPERATOR_ROOT.value
 
     def get_type(self): return self.type
 
     def get_value(self): return self.value
+
+    def get_line_no(self): return self.line_no
 
 
 class Lexer:
@@ -79,13 +81,19 @@ class Lexer:
         self.code = _code
         self.index = -1
         self.char = None
-        self.line = 1
+        self.line_no = 1
+        self.line = ""
+
+    def get_line(self):
+        return self.line
 
     # Move to next character
     def next_char(self):
         if (self.index + 1) < len(self.code):
             self.index += 1
             self.char = self.code[self.index]
+
+            self.line += self.char
 
             # Check if the character is an acceptable ASCII code
             if not self.is_printable_ascii_char():
@@ -110,11 +118,11 @@ class Lexer:
                 token_type = Token.get_token_type(text)
 
                 if token_type is not None:
-                    token = Token(token_type, text, self.line)
+                    token = Token(token_type, text, self.line_no)
                 elif text.isalpha() and len(text) < 50 and text[0].islower():
-                    token = Token(TokenType.IDENTIFIER, text, self.line)
+                    token = Token(TokenType.IDENTIFIER, text, self.line_no)
                 else:
-                    self.throw_error()
+                    raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.line_no, self.line)
 
             # If the first char is double quotes, it can be a string
             elif self.char == '[':
@@ -125,30 +133,31 @@ class Lexer:
 
                 text = text[1:len(text)-1]
 
-                token = Token(TokenType.STRING, text, self.line)
+                token = Token(TokenType.STRING, text, self.line_no)
 
             # If first char is numeric, it can be an integer
             elif self.char.isdigit():
                 text = self.advance_chars()
                 if text.isdigit():
-                    token = Token(TokenType.NUMBER, text, self.line)
+                    token = Token(TokenType.NUMBER, text, self.line_no)
                 else:
-                    self.throw_error()
+                    raise InterpreterError(InterpreterError.INVALID_DATA_TYPE, self.line_no, self.line)
 
             # Delimiter
             elif self.char == "\n":
-                token = Token(TokenType.END_OF_STATEMENT, "EOS", self.line)
-                self.line += 1
+                token = Token(TokenType.END_OF_STATEMENT, "EOS", self.line_no)
+                self.line_no += 1
+                self.line = self.line[0:len(self.line)-1]
 
             else:
-                self.throw_error()
+                raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.line_no, self.line)
 
             # Returns token when it is already created
             if token is not None:
                 return token
 
-        self.line += 1
-        token = Token(TokenType.END_OF_FILE, "EOF", self.line)
+        self.line_no += 1
+        token = Token(TokenType.END_OF_FILE, "EOF", self.line_no)
 
         return token
 
@@ -164,6 +173,7 @@ class Lexer:
         # If loop above terminates due to space, move back cursor to last non-space char
         if self.char is not None and self.char.isspace():
             self.index -= 1
+            self.line = self.line[0:len(self.line)-1]
 
         return self.code[start_pos: self.index + 1]
 
@@ -172,7 +182,7 @@ class Lexer:
         return 32 <= ord(self.char) <= 126 or 9 <= ord(self.char) <= 10
 
     def throw_error(self, token):
-        raise LexerError
+        raise InterpreterError
 
 
 class Parser:
@@ -180,9 +190,36 @@ class Parser:
         self.lexer = _lexer
         self.token = None
         self.tokens = []
+        self.variables = {}
 
-    def get_tokens(self):
-        return self.tokens
+    def get_current_line(self): return self.lexer.line
+    def clear_current_line(self): self.lexer.line = ""
+
+    def get_tokens(self): return self.tokens
+
+    def variable_exists(self, name): return name in self.variables
+
+    def declare_variable(self, _name, _type, _value=None):
+        if self.variable_exists(_name):
+            raise InterpreterError(InterpreterError.DUPLICATE_VARIABLE, self.token.line_no, self.get_current_line())
+
+        variable = Variable(_name, _type, _value)
+        self.variables[_name] = variable
+
+    def assign_value_variable(self, name, value):
+        if not (self.variable_exists(name)):
+            raise InterpreterError(InterpreterError.VARIABLE_NOT_DECLARED, self.token.line_no, self.get_current_line())
+
+        variable = self.get_variable(name)
+
+        if not (variable.type == TokenType.NUMBER and str(value).isnumeric()) or \
+                (variable.type == TokenType.STRING and value.isalpha()):
+            raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
+
+        variable.value = value
+        self.variables[name] = variable
+
+    def get_variable(self, name): return self.variables.get(name)
 
     def next_token(self):
         self.token = self.lexer.next_token()
@@ -192,59 +229,151 @@ class Parser:
 
         return self.token
 
+    # Main parser logic
     def execute(self):
-        while self.next_token().type is not TokenType.END_OF_FILE:
-            if self.token.type is TokenType.OUTPUT or self.token.type is TokenType.OUTPUT_WITH_LINE:
-                if self.token.type is TokenType.OUTPUT:
-                    self.print("")
-                else:
-                    self.print("\n")
+        try:
+            while self.next_token().type is not TokenType.END_OF_FILE:
+                if self.token.type is TokenType.OUTPUT or self.token.type is TokenType.OUTPUT_WITH_LINE:
+                    if self.token.type is TokenType.OUTPUT:
+                        self.print("")
+                    else:
+                        self.print("\n")
+
+                if self.token.type is TokenType.DECLARATION_INT or self.token.type is TokenType.DECLARATION_STRING:
+                    self.assign()
+
+                if self.token.type is TokenType.ASSIGN_KEY:
+                    self.store()
+
+                self.clear_current_line()
+
+        except InterpreterError as e:
+            print(str(e))
 
     def evaluate_expression(self):
+
+        if not (self.token.is_arithmetic_operator() or self.token.type is TokenType.IDENTIFIER or
+                self.token.type is TokenType.NUMBER or self.token.type is TokenType.STRING):
+            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
+        value = None
+
+        if self.token.type is TokenType.IDENTIFIER:
+            variable = self.get_variable(self.token.value)
+            value = variable.value
+
+            if value.isnumeric():
+                value = int(value)
+
+        if self.token.type is TokenType.NUMBER:
+            value = int(self.token.value)
+
+        if self.token.type is TokenType.STRING:
+            value = self.token.value
+
         if self.token.has_two_operators():
             return self.two_operators_arithmetic()
 
-        return None
+        return value
+
+    def store(self):
+        self.next_token()
+        expression_result = self.evaluate_expression()
+
+        operator = self.next_token()
+
+        if operator.type is not TokenType.ASSIGN_VAR_KEY:
+            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
+        variable = self.next_token()
+
+        if variable.type is not TokenType.IDENTIFIER:
+            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
+        self.assign_value_variable(variable.value, expression_result)
+
+    def assign(self):
+        declaration_type = self.token
+        identifier = self.next_token()
+        value = None
+
+        if identifier.type is not TokenType.IDENTIFIER:
+            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
+        operator = self.next_token()
+
+        if operator.type is TokenType.DECLARATION_ASSIGN_WITH_KEY:
+            self.next_token()
+            value = self.evaluate_expression()
+
+            if not (value is not None and
+                ((declaration_type.type is TokenType.DECLARATION_INT and str(value).isnumeric()) or
+                    declaration_type.type is TokenType.DECLARATION_STRING and value.isalpha())):
+
+                raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no,
+                            self.get_current_line())
+
+        elif operator.type is TokenType.END_OF_STATEMENT:
+            pass
+        else:
+            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
+        if declaration_type.type is TokenType.DECLARATION_INT:
+            variable_type = TokenType.NUMBER
+        else:
+            variable_type = TokenType.STRING
+
+        self.declare_variable(identifier.value, variable_type, value)
 
     def two_operators_arithmetic(self):
-        self.next_token()
+        operator = self.token.type
+        expression1 = self.next_token()
 
-        operand1 = self.get_literal_identifier_value()
+        operand1 = self.get_literal_identifier()
         if operand1 is None:
             if self.token.is_arithmetic_operator():
                 operand1 = self.evaluate_expression()
+        elif expression1.type is TokenType.IDENTIFIER:
+            operand1 = operand1.value
 
-        self.next_token()
+        expression2 = self.next_token()
 
-        operand2 = self.get_literal_identifier_value()
+        operand2 = self.get_literal_identifier()
         if operand2 is None:
             if self.token.is_arithmetic_operator():
                 operand2 = self.evaluate_expression()
+        elif expression2.type is TokenType.IDENTIFIER:
+            operand2 = operand2.value
 
-        if self.token == TokenType.BASIC_OPERATOR_ADD:
+        if operator == TokenType.BASIC_OPERATOR_ADD:
             return operand1 + operand2
-        if self.token == TokenType.BASIC_OPERATOR_SUB:
+        if operator == TokenType.BASIC_OPERATOR_SUB:
             return operand1 - operand2
-        if self.token == TokenType.BASIC_OPERATOR_MUL:
+        if operator == TokenType.BASIC_OPERATOR_MUL:
             return operand1 * operand2
-        if self.token == TokenType.BASIC_OPERATOR_DIV:
+        if operator == TokenType.BASIC_OPERATOR_DIV:
             return operand1 / operand2
-        if self.token == TokenType.BASIC_OPERATOR_MOD:
+        if operator == TokenType.BASIC_OPERATOR_MOD:
             return operand1 % operand2
-        if self.token == TokenType.ADVANCED_OPERATOR_EXP:
-            return math.sqrt()
+        if operator == TokenType.ADVANCED_OPERATOR_EXP:
+            return operand1 ** operand2
+        if operator == TokenType.ADVANCED_OPERATOR_ROOT:
+            return operand2 ** (1/float(operand1))
 
     def print(self, _end):
-        self.next_token()
+        expression = self.next_token()
 
-        value = self.get_literal_identifier_value()
+        value = self.get_literal_identifier()
+
         if value is None:
             if self.token.is_arithmetic_operator():
                 value = self.evaluate_expression()
+        elif expression.type is TokenType.IDENTIFIER:
+            value = value.value
 
         print(value, end=_end)
 
-    def get_literal_identifier_value(self):
+    def get_literal_identifier(self):
         value = None
 
         if self.token.type == TokenType.STRING or self.token.type == TokenType.NUMBER:
@@ -253,20 +382,36 @@ class Parser:
                 return int(value)
 
         elif self.token.type == TokenType.IDENTIFIER:
-            pass
+            return self.get_variable(self.token.value)
 
         return value
 
 
-class LexerError(Exception):
-    def __init__(self, _message="The syntax is incorrect."):
-        self.message = _message
-        super().__init__(self.message)
+class Variable:
+    def __init__(self, _name, _type, _value):
+        self.name = _name
+        self.type = _type
+        self.value = _value
 
 
-class ParserError(Exception):
-    def __init__(self, _message="The syntax is incorrect."):
-        self.message = _message
+class InterpreterError(Exception):
+
+    INVALID_SYNTAX = "Invalid syntax"
+    VARIABLE_NOT_DECLARED = "Variable is not declared"
+    INVALID_ARITHMETIC_OPERATION = "Invalid arithmetic operation"
+    INVALID_EXPRESSION = "Invalid expression"
+    INVALID_DATA_TYPE = "Invalid data type"
+    DUPLICATE_VARIABLE = "Duplicate variable declaration"
+    INCOMPATIBLE_DATE_TYPE = "Incompatible data type"
+    INVALID_DATA_TYPE_INPUT = "Invalid data type input"
+    INVALID_EOF = "Invalid end of file"
+    FILE_EMPTY = "File is empty"
+    FILE_NOT_FOUND = "File not found"
+    INVALID_FILE = "Invalid file"
+
+    def __init__(self, _message, line_no, line):
+        self.message = _message + " at line number [ " + str(line_no) + " ]" + "\n" + \
+            " ----> " + line
         super().__init__(self.message)
 
 
@@ -293,11 +438,11 @@ def main():
 
     parser.execute()
 
-    print(token_list_header)
-    print(token_list_columns)
+    #print(token_list_header)
+    #print(token_list_columns)
 
     for token in parser.get_tokens():
-        print(str(token.line).ljust(10) + TokenType(token.type).name.ljust(32) + token.value)
+        pass #print(str(token.line).ljust(10) + TokenType(token.type).name.ljust(32) + token.value)
 
 
 # Execute INTERPOL program automatically if running the module itself
