@@ -110,11 +110,8 @@ class LexicalAnalyzer:
 
             # If first char is #, it is a comment
             elif self.char == "#":
-                token = Token(TokenType.COMMENT, self.code)
-
-            # Delimiter
-            elif self.char == "\n":
-                token = Token(TokenType.NEWLINE, self.char)
+                #token = Token(TokenType.COMMENT, self.code)
+                self.index = len(self.code) - 1
 
             else:
                 self.throw_error()

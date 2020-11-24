@@ -212,7 +212,7 @@ class Parser:
 
         variable = self.get_variable(name)
 
-        if not (variable.type == TokenType.NUMBER and str(value).isnumeric() or \
+        if not (variable.type == TokenType.NUMBER and str(value).isnumeric() or
                 (variable.type == TokenType.STRING and not str(value).isnumeric())):
             raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
 
