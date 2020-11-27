@@ -39,15 +39,18 @@ class Token:
                 return tokenType
         return None
 
-    def is_type(self, _type): return self.type == _type
+    def is_type(self, _type):
+        return self.type == _type
 
     def is_math_operator(self):
         keyword = self.get_keyword(self.value)
         return keyword is not None and 20 <= keyword.value <= 29
 
-    def get_type(self): return self.type
+    def get_type(self):
+        return self.type
 
-    def get_value(self): return self.value
+    def get_value(self):
+        return self.value
 
 
 class LexicalAnalyzer:
@@ -96,21 +99,27 @@ class LexicalAnalyzer:
                 if not (len(text) > 1 and text[0] == '\"' and text[len(text) - 1] == '\"'):
                     self.throw_error()
 
-                text = text[1:len(text)-1]
+                text = text[1:len(text) - 1]
 
                 token = Token(TokenType.STRING, text)
 
             # If first char is numeric, it can be an integer
-            elif self.char.isdigit():
+            elif self.char.isdigit() or self.char == '-':
                 text = self.advance_chars()
-                if text.isdigit():
-                    token = Token(TokenType.INT, text)
-                else:
+                value = None
+
+                try:
+                    value = int(text)
+                except RuntimeError as e:
+                    value = None
+
+                if value is None:
                     self.throw_error()
+                else:
+                    token = Token(TokenType.INT, text)
 
             # If first char is #, it is a comment
             elif self.char == "#":
-                #token = Token(TokenType.COMMENT, self.code)
                 self.index = len(self.code) - 1
 
             else:
@@ -126,7 +135,7 @@ class LexicalAnalyzer:
         # Continue until EOL, delimiter is reached or space is reached
         while self.next_char() is not None and \
                 ((not self.char.isspace() and delimiter is None) or
-                 (delimiter is not None))\
+                 (delimiter is not None)) \
                 and not self.char == delimiter:
             pass
         # If loop above terminates due to space, move back cursor to last non-space char
@@ -229,8 +238,8 @@ class TokenAnalyzer:
         token_type = self.token.get_type()
         self.get_remaining_tokens()
 
-        if not(len(self.remaining_tokens) == 2 and
-               self.remaining_tokens[0].is_type(TokenType.INT) and self.remaining_tokens[1].is_type(TokenType.INT)):
+        if not (len(self.remaining_tokens) == 2 and
+                self.remaining_tokens[0].is_type(TokenType.INT) and self.remaining_tokens[1].is_type(TokenType.INT)):
             raise ParserError
 
         value1 = int(self.remaining_tokens[0].get_value())
@@ -247,9 +256,9 @@ class TokenAnalyzer:
                 raise ParserError("Error: Division by zero")
 
             if token_type == TokenType.DIV:
-                print(value1 / value2)
+                print(int(value1 / value2))
             else:
-                print(value1 % value2)
+                print(int(value1 % value2))
 
     def end(self):
         self.get_remaining_tokens()
