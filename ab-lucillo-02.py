@@ -110,7 +110,7 @@ class LexicalAnalyzer:
 
                 try:
                     value = int(text)
-                except RuntimeError as e:
+                except:
                     value = None
 
                 if value is None:
@@ -118,9 +118,9 @@ class LexicalAnalyzer:
                 else:
                     token = Token(TokenType.INT, text)
 
-            # If first char is #, it is a comment
+            # If first char is #, it is considered a comment
             elif self.char == "#":
-                self.index = len(self.code) - 1
+                self.advance_chars("\n")
 
             else:
                 self.throw_error()
