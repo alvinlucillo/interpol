@@ -87,7 +87,7 @@ class Lexer:
     def get_line(self):
         return self.line
 
-    # Move to next character
+    # Move to the next character
     def next_char(self):
         if (self.index + 1) < len(self.code):
             self.index += 1
@@ -136,12 +136,16 @@ class Lexer:
                 token = Token(TokenType.STRING, text, self.line_no)
 
             # If first char is numeric, it can be an integer
-            elif self.char.isdigit():
+            elif self.char.isdigit() or self.char == "-":
+
                 text = self.advance_chars()
-                if text.isdigit():
-                    token = Token(TokenType.NUMBER, text, self.line_no)
-                else:
+
+                try:
+                    int(text)
+                except:
                     raise InterpreterError(InterpreterError.INVALID_DATA_TYPE, self.line_no, self.line)
+
+                token = Token(TokenType.NUMBER, text, self.line_no)
 
             # Delimiter
             elif self.char == "\n":
@@ -212,7 +216,7 @@ class Parser:
 
         variable = self.get_variable(name)
 
-        if not (variable.type == TokenType.NUMBER and str(value).isnumeric() or
+        if not (variable.type == TokenType.NUMBER and str(value).replace("-", "").isnumeric() or
                 (variable.type == TokenType.STRING and not str(value).isnumeric())):
             raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
 
@@ -247,6 +251,9 @@ class Parser:
                 elif self.token.type is TokenType.ASSIGN_KEY:
                     self.store()
 
+                elif self.token.type is TokenType.INPUT:
+                    self.input()
+
                 elif self.token.type is TokenType.PROGRAM_END:
                     self.next_token()
                     break
@@ -261,7 +268,7 @@ class Parser:
         except InterpreterError as e:
             print(str(e))
 
-    # Evaluates the expression to reach its value through recursion
+    # Evaluates the expression to reach its value through recursion algorithm
     def evaluate_expression(self):
 
         if not (self.token.is_arithmetic_operator() or self.token.type is TokenType.IDENTIFIER or
@@ -272,6 +279,11 @@ class Parser:
 
         if self.token.type is TokenType.IDENTIFIER:
             variable = self.get_variable(self.token.value)
+
+            if variable is None:
+                raise InterpreterError(InterpreterError.VARIABLE_NOT_DECLARED, self.token.line_no,
+                                       self.get_current_line())
+
             value = variable.value
 
             if str(value).isnumeric():
@@ -287,6 +299,16 @@ class Parser:
             return self.two_operators_arithmetic()
 
         return value
+
+    def input(self):
+        variable = self.next_token()
+
+        if variable.type is not TokenType.IDENTIFIER:
+            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
+        value = input()
+
+        self.assign_value_variable(variable.value, value)
 
     def store(self):
         self.next_token()
@@ -345,20 +367,25 @@ class Parser:
         self.next_token()
         operand2 = self.evaluate_expression()
 
-        if operator == TokenType.BASIC_OPERATOR_ADD:
-            return operand1 + operand2
-        if operator == TokenType.BASIC_OPERATOR_SUB:
-            return operand1 - operand2
-        if operator == TokenType.BASIC_OPERATOR_MUL:
-            return operand1 * operand2
-        if operator == TokenType.BASIC_OPERATOR_DIV:
-            return operand1 / operand2
-        if operator == TokenType.BASIC_OPERATOR_MOD:
-            return operand1 % operand2
-        if operator == TokenType.ADVANCED_OPERATOR_EXP:
-            return operand1 ** operand2
-        if operator == TokenType.ADVANCED_OPERATOR_ROOT:
-            return operand2 ** (1/float(operand1))
+        try:
+
+            if operator == TokenType.BASIC_OPERATOR_ADD:
+                return operand1 + operand2
+            if operator == TokenType.BASIC_OPERATOR_SUB:
+                return operand1 - operand2
+            if operator == TokenType.BASIC_OPERATOR_MUL:
+                return operand1 * operand2
+            if operator == TokenType.BASIC_OPERATOR_DIV:
+                return int(operand1 / operand2)
+            if operator == TokenType.BASIC_OPERATOR_MOD:
+                return int(operand1 % operand2)
+            if operator == TokenType.ADVANCED_OPERATOR_EXP:
+                return int(operand1 ** operand2)
+            if operator == TokenType.ADVANCED_OPERATOR_ROOT:
+                return int(operand2 ** (1/float(operand1)))
+        except:
+            raise InterpreterError(InterpreterError.INVALID_ARITHMETIC_OPERATION, self.token.line_no,
+                                   self.get_current_line())
 
     def print(self, _end):
         expression = self.next_token()
