@@ -1,5 +1,4 @@
 from enum import Enum
-import math
 
 
 class TokenType(Enum):
@@ -286,9 +285,6 @@ class Parser:
 
             value = variable.value
 
-            if str(value).isnumeric():
-                value = int(value)
-
         if self.token.type is TokenType.NUMBER:
             value = int(self.token.value)
 
@@ -297,6 +293,28 @@ class Parser:
 
         if self.token.has_two_operators():
             return self.two_operators_arithmetic()
+
+        elif self.token.type is TokenType.ADVANCED_OPERATOR_AVE:
+            count = 0
+            value = 0
+            self.next_token()
+            while self.token.type is not TokenType.END_OF_STATEMENT:
+                value += self.evaluate_expression()
+                count += 1
+                self.next_token()
+
+            return int(value/count)
+
+        elif self.token.type is TokenType.ADVANCED_OPERATOR_DIST:
+            self.next_token()
+            expr1 = self.evaluate_expression()
+            self.next_token()
+            expr2 = self.evaluate_expression()
+            operator = self.next_token()
+            self.next_token()
+            expr3 = self.evaluate_expression()
+            self.next_token()
+            expr4 = self.evaluate_expression()
 
         return value
 
@@ -341,7 +359,7 @@ class Parser:
             value = self.evaluate_expression()
 
             if not (value is not None and
-                    ((declaration_type.type is TokenType.DECLARATION_INT and str(value).isnumeric()) or
+                    ((declaration_type.type is TokenType.DECLARATION_INT and str(value).replace("-", "").isnumeric()) or
                         declaration_type.type is TokenType.DECLARATION_STRING and not str(value).isnumeric())):
 
                 raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no,
@@ -393,19 +411,6 @@ class Parser:
         value = self.evaluate_expression()
 
         print(value, end=_end)
-
-    def get_literal_identifier(self):
-        value = None
-
-        if self.token.type == TokenType.STRING or self.token.type == TokenType.NUMBER:
-            value = self.token.value
-            if value.isnumeric():
-                return int(value)
-
-        elif self.token.type == TokenType.IDENTIFIER:
-            return self.get_variable(self.token.value)
-
-        return value
 
 
 class Variable:
