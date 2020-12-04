@@ -297,24 +297,46 @@ class Parser:
         elif self.token.type is TokenType.ADVANCED_OPERATOR_AVE:
             count = 0
             value = 0
+
             self.next_token()
+
             while self.token.type is not TokenType.END_OF_STATEMENT:
                 value += self.evaluate_expression()
                 count += 1
                 self.next_token()
 
-            return int(value/count)
+            try:
+                result = int(value/count)
+            except:
+                raise InterpreterError(InterpreterError.INVALID_ARITHMETIC_OPERATION, self.token.line_no,
+                                       self.get_current_line())
+
+            return result
 
         elif self.token.type is TokenType.ADVANCED_OPERATOR_DIST:
             self.next_token()
             expr1 = self.evaluate_expression()
+
             self.next_token()
             expr2 = self.evaluate_expression()
+
             operator = self.next_token()
+
+            if operator.type is not TokenType.DISTANCE_SEPARATOR:
+                raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
             self.next_token()
             expr3 = self.evaluate_expression()
+
             self.next_token()
             expr4 = self.evaluate_expression()
+
+            try:
+                result = int((((expr4-expr2)**2)+((expr3-expr1)**2))**(1/2))
+            except:
+                raise InterpreterError(InterpreterError.INVALID_ARITHMETIC_OPERATION, self.token.line_no,
+                                       self.get_current_line())
+            return result
 
         return value
 
