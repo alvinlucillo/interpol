@@ -1,4 +1,5 @@
 from enum import Enum
+import pathlib
 
 
 class TokenType(Enum):
@@ -202,14 +203,24 @@ class Parser:
 
     def variable_exists(self, name): return name in self.variables
 
-    def declare_variable(self, _name, _type, _value=None):
-        if self.variable_exists(_name):
+    def declare_variable(self, name, token_type, value):
+        if self.variable_exists(name):
             raise InterpreterError(InterpreterError.DUPLICATE_VARIABLE, self.token.line_no, self.get_current_line())
 
-        variable = Variable(_name, _type, _value)
-        self.variables[_name] = variable
+        error = self.check_data_type_compatibility_errors(token_type, value)
 
-    def assign_value_variable(self, name, value):
+        if error == 2:
+            raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
+        if error == 1:
+            raise InterpreterError(InterpreterError.INVALID_DATA_TYPE, self.token.line_no, self.get_current_line())
+
+        if token_type == TokenType.NUMBER:
+            value = int(value)
+
+        variable = Variable(name, token_type, value)
+        self.variables[name] = variable
+
+    def assign_value_variable(self, name, value, for_input=False):
         if not (self.variable_exists(name)):
             raise InterpreterError(InterpreterError.VARIABLE_NOT_DECLARED, self.token.line_no, self.get_current_line())
 
@@ -220,7 +231,12 @@ class Parser:
         if error == 2:
             raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
         if error == 1:
-            raise InterpreterError(InterpreterError.INVALID_DATA_TYPE, self.token.line_no, self.get_current_line())
+            if for_input:
+                raise InterpreterError(InterpreterError.INVALID_DATA_TYPE_INPUT,
+                                       self.token.line_no, self.get_current_line())
+            else:
+                raise InterpreterError(InterpreterError.INVALID_DATA_TYPE,
+                                       self.token.line_no, self.get_current_line())
 
         if variable.type == TokenType.NUMBER:
             value = int(value)
@@ -238,13 +254,13 @@ class Parser:
         except:
             can_be_float = False
 
-        is_float = can_be_float and '.' in value
+        is_float = can_be_float and '.' in str(value)
 
         if is_float:
             return 1
 
-        if (type == TokenType.NUMBER and not can_be_float) or \
-                (type == TokenType.STRING and can_be_float):
+        if data_type == TokenType.NUMBER and not can_be_float or \
+                data_type == TokenType.STRING and can_be_float:
             return 2
 
         return 0
@@ -375,7 +391,9 @@ class Parser:
 
         value = input()
 
-        self.assign_value_variable(variable.value, value)
+        error = self.check_data_type_compatibility_errors(variable.type, value)
+
+        self.assign_value_variable(variable.value, value, True)
 
     def store(self):
         self.next_token()
@@ -406,13 +424,6 @@ class Parser:
         if operator.type is TokenType.DECLARATION_ASSIGN_WITH_KEY:
             self.next_token()
             value = self.evaluate_expression()
-
-            if not (value is not None and
-                    ((declaration_type.type is TokenType.DECLARATION_INT and str(value).replace("-", "").isnumeric()) or
-                        declaration_type.type is TokenType.DECLARATION_STRING and not str(value).isnumeric())):
-
-                raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no,
-                                       self.get_current_line())
         elif operator.type is TokenType.END_OF_STATEMENT:
             pass
         else:
@@ -420,8 +431,10 @@ class Parser:
 
         if declaration_type.type is TokenType.DECLARATION_INT:
             variable_type = TokenType.NUMBER
+            value = 0 if value is None else value
         else:
             variable_type = TokenType.STRING
+            value = "" if value is None else value
 
         self.declare_variable(identifier.value, variable_type, value)
 
@@ -500,9 +513,11 @@ def main():
 
     print(welcome_message)
 
-    # file_path = input("Enter INTERPOL file (.ipol): ")
-    file_path = "C:\\Users\\Alvin Lucillo\\PycharmProjects\\interpol\\venv\\test1.ipol"
-    file = open(file_path, 'r')
+    file_name = input("Enter INTERPOL file (.ipol): ")
+    # file_path = "C:\\Users\\Alvin Lucillo\\PycharmProjects\\interpol\\venv\\test1.ipol"
+    file_path = str(pathlib.Path(__file__).parent.absolute())
+    # file_name = "test1.ipol"
+    file = open(pathlib.Path(file_path, file_name), 'r')
     contents = file.read()
 
     print(output_message)

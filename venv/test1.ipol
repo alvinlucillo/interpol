@@ -1,5 +1,0 @@
-BEGIN
-VARSTR x
-INPUT x
-PRINT x
-END
