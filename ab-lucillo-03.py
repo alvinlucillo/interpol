@@ -215,12 +215,39 @@ class Parser:
 
         variable = self.get_variable(name)
 
-        if not (variable.type == TokenType.NUMBER and str(value).replace("-", "").isnumeric() or
-                (variable.type == TokenType.STRING and not str(value).isnumeric())):
+        error = self.check_data_type_compatibility_errors(variable.type, value)
+
+        if error == 2:
             raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
+        if error == 1:
+            raise InterpreterError(InterpreterError.INVALID_DATA_TYPE, self.token.line_no, self.get_current_line())
+
+        if variable.type == TokenType.NUMBER:
+            value = int(value)
 
         variable.value = value
         self.variables[name] = variable
+
+    @staticmethod
+    # Returns: 0 (No issues); 1 (Data type) issue; 2 (Compatibility issue)
+    def check_data_type_compatibility_errors(data_type, value):
+        can_be_float = True
+
+        try:
+            float(value)
+        except:
+            can_be_float = False
+
+        is_float = can_be_float and '.' in value
+
+        if is_float:
+            return 1
+
+        if (type == TokenType.NUMBER and not can_be_float) or \
+                (type == TokenType.STRING and can_be_float):
+            return 2
+
+        return 0
 
     def get_variable(self, name): return self.variables.get(name)
 
