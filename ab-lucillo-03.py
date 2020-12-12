@@ -1,5 +1,6 @@
 from enum import Enum
 import pathlib
+import os
 
 
 class TokenType(Enum):
@@ -125,10 +126,10 @@ class Lexer:
                     raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.line_no, self.line)
 
             # If the first char is double quotes, it can be a string
-            elif self.char == '[':
-                text = self.advance_chars(']')
+            elif self.char == '"':
+                text = self.advance_chars('"')
 
-                if not (len(text) > 1 and text[0] == '[' and text[len(text) - 1] == ']'):
+                if not (len(text) > 1 and text[0] == '"' and text[len(text) - 1] == '"'):
                     self.throw_error()
 
                 text = text[1:len(text)-1]
@@ -507,32 +508,67 @@ def main():
     welcome_message = "========  INTERPOL INTERPRETER STARTED   ========\n"
     output_message = "================ INTERPOL OUTPUT ================\n"
     output_message_start = "----------------  OUTPUT START  ---------------->"
-    output_message_end = "<----------------- OUTPUT END -------------------"
-    token_list_header = "\n\n========= INTERPOL LEXEMES/TOKENS TABLE =========\n"
+    output_message_end = "\n<----------------- OUTPUT END -------------------"
+    token_list_header = "\n========= INTERPOL LEXEMES/TOKENS TABLE =========\n"
     token_list_columns = "LINE NO.  TOKENS                          LEXEMES"
+    symbol_list_header = "\n================= SYMBOLS TABLE ================="
+    symbol_list_columns = "VARIABLE NAME       TYPE        VALUE"
+    termination_message = "\n======== INTERPOL INTERPRETER TERMINATED ========"
 
     print(welcome_message)
 
-    file_name = input("Enter INTERPOL file (.ipol): ")
-    # file_path = "C:\\Users\\Alvin Lucillo\\PycharmProjects\\interpol\\venv\\test1.ipol"
-    file_path = str(pathlib.Path(__file__).parent.absolute())
-    # file_name = "test1.ipol"
-    file = open(pathlib.Path(file_path, file_name), 'r')
+    file_path = input("Enter INTERPOL file (.ipol): ")
+    # file_path = "test1.ipol"
+    contents = None
+
+    # Use the path relative to this script if path is not absolute
+    if not os.path.isabs(file_path):
+        file_path = pathlib.Path(str(pathlib.Path(__file__).parent.absolute()), file_path)
+
+    if not pathlib.Path(file_path).suffix == ".ipol":
+        print(InterpreterError.INVALID_FILE)
+        return
+
+    if not os.path.isfile(file_path):
+        print(InterpreterError.FILE_NOT_FOUND)
+        return
+
+    if not os.path.getsize(file_path) > 0:
+        print(InterpreterError.FILE_EMPTY)
+        return
+
+    file = open(file_path, 'r')
     contents = file.read()
 
-    print(output_message)
-    print(output_message_start)
+    if contents is not None:
+        print(output_message)
+        print(output_message_start)
 
-    lexer = Lexer(contents)
-    parser = Parser(lexer)
+        lexer = Lexer(contents)
+        parser = Parser(lexer)
 
-    parser.execute()
+        parser.execute()
 
-    #print(token_list_header)
-    #print(token_list_columns)
+        print(output_message_end)
 
-    for token in parser.get_tokens():
-        pass #print(str(token.line).ljust(10) + TokenType(token.type).name.ljust(32) + token.value)
+        # Display all tokens
+        print(token_list_header)
+        print(token_list_columns)
+
+        for token in parser.tokens:
+            print(str(token.line_no).ljust(10) + TokenType(token.type).name.ljust(32) + token.value)
+
+        # Display all symbols
+        print(symbol_list_header)
+        print(symbol_list_columns)
+
+        for variable in parser.variables:
+            var = parser.variables[variable]
+            typ = "NUMBER" if var.type is TokenType.NUMBER else "STRING"
+
+            print(str(var.name).ljust(20) + str(typ).ljust(12) + str(var.value))
+
+        print(termination_message, end="")
 
 
 # Execute INTERPOL program automatically if running the module itself

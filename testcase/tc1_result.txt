@@ -1,0 +1,24 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): ================ INTERPOL OUTPUT ================
+
+----------------  OUTPUT START  ---------------->
+
+<----------------- OUTPUT END -------------------
+
+========= INTERPOL LEXEMES/TOKENS TABLE =========
+
+LINE NO.  TOKENS                          LEXEMES
+1         PROGRAM_BEGIN                   BEGIN
+1         END_OF_STATEMENT                EOS
+2         DECLARATION_INT                 VARINT
+2         IDENTIFIER                      x
+2         END_OF_STATEMENT                EOS
+3         PROGRAM_END                     END
+4         END_OF_FILE                     EOF
+
+================= SYMBOLS TABLE =================
+VARIABLE NAME       TYPE        VALUE
+x                   NUMBER      0
+
+======== INTERPOL INTERPRETER TERMINATED ========

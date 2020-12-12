@@ -1,0 +1,4 @@
+BEGIN
+VARSTR x
+INPUT x
+END
