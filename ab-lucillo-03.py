@@ -309,7 +309,7 @@ class Parser:
                 self.clear_current_line()
 
         except InterpreterError as e:
-            print(str(e))
+            print(str(e), end="")
 
     # Evaluates the expression to reach its value through recursion algorithm
     def evaluate_expression(self):
@@ -552,15 +552,17 @@ def main():
         print(output_message_end)
 
         # Display all tokens
-        print(token_list_header)
-        print(token_list_columns)
+        if len(parser.tokens) > 0:
+            print(token_list_header)
+            print(token_list_columns)
 
         for token in parser.tokens:
             print(str(token.line_no).ljust(10) + TokenType(token.type).name.ljust(32) + token.value)
 
         # Display all symbols
-        print(symbol_list_header)
-        print(symbol_list_columns)
+        if len(parser.variables) > 0:
+            print(symbol_list_header)
+            print(symbol_list_columns)
 
         for variable in parser.variables:
             var = parser.variables[variable]

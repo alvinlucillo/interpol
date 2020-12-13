@@ -1,4 +1,4 @@
 BEGIN
-VARSTR x
-INPUT x
+VARSTR stringmo WITH [Enter an integer: ]
+INPUT stringmo
 END

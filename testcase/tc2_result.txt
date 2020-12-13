@@ -3,7 +3,8 @@
 Enter INTERPOL file (.ipol): ================ INTERPOL OUTPUT ================
 
 ----------------  OUTPUT START  ---------------->
-
+Invalid syntax at line number [ 2 ]
+ ----> VARSTR stringmo WITH [
 <----------------- OUTPUT END -------------------
 
 ========= INTERPOL LEXEMES/TOKENS TABLE =========
@@ -12,17 +13,7 @@ LINE NO.  TOKENS                          LEXEMES
 1         PROGRAM_BEGIN                   BEGIN
 1         END_OF_STATEMENT                EOS
 2         DECLARATION_STRING              VARSTR
-2         IDENTIFIER                      x
-2         END_OF_STATEMENT                EOS
-3         INPUT                           INPUT
-3         IDENTIFIER                      x
-3         END_OF_STATEMENT                EOS
-4         PROGRAM_END                     END
-5         END_OF_FILE                     EOF
-
-================= SYMBOLS TABLE =================
-
-VARIABLE NAME       TYPE        VALUE
-x                   STRING      hello world
+2         IDENTIFIER                      stringmo
+2         DECLARATION_ASSIGN_WITH_KEY     WITH
 
 ======== INTERPOL INTERPRETER TERMINATED ========

@@ -4,7 +4,7 @@ import pathlib
 
 def main():
 
-    testdata = [[], ["hello world\n"]]
+    testdata = [[], [], ["12\n"]]
 
     tc = 0
     successful = 0
@@ -36,10 +36,10 @@ def run_test(tc, input_data=None, show_result=False, formatted=False, show_diffe
 
     file = open(file_path, 'r')
     expected = file.read()
-    repr_expected = repr(expected
-                         )
-    print("\n************\nTEST CASE #" + str(tc) + "\n************")
+    repr_expected = repr(expected)
     repr_result = str(repr(output)).replace("\\r", "")
+
+    print("\n************\nTEST CASE #" + str(tc) + "\n************")
 
     successful = repr_expected == repr_result
 
