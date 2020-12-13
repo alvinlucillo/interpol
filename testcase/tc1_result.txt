@@ -3,7 +3,9 @@
 Enter INTERPOL file (.ipol): ================ INTERPOL OUTPUT ================
 
 ----------------  OUTPUT START  ---------------->
-
+I have a pen
+1
+100
 <----------------- OUTPUT END -------------------
 
 ========= INTERPOL LEXEMES/TOKENS TABLE =========
@@ -11,14 +13,45 @@ Enter INTERPOL file (.ipol): ================ INTERPOL OUTPUT ================
 LINE NO.  TOKENS                          LEXEMES
 1         PROGRAM_BEGIN                   BEGIN
 1         END_OF_STATEMENT                EOS
-2         DECLARATION_INT                 VARINT
-2         IDENTIFIER                      x
+2         DECLARATION_STRING              VARSTR
+2         IDENTIFIER                      stringmo
+2         DECLARATION_ASSIGN_WITH_KEY     WITH
+2         STRING                          I have a pen
 2         END_OF_STATEMENT                EOS
-3         PROGRAM_END                     END
-4         END_OF_FILE                     EOF
+3         OUTPUT_WITH_LINE                PRINTLN
+3         IDENTIFIER                      stringmo
+3         END_OF_STATEMENT                EOS
+4         DECLARATION_INT                 VARINT
+4         IDENTIFIER                      x
+4         DECLARATION_ASSIGN_WITH_KEY     WITH
+4         BASIC_OPERATOR_ADD              ADD
+4         NUMBER                          1
+4         BASIC_OPERATOR_SUB              SUB
+4         NUMBER                          9
+4         NUMBER                          9
+4         END_OF_STATEMENT                EOS
+5         DECLARATION_INT                 VARINT
+5         IDENTIFIER                      y
+5         END_OF_STATEMENT                EOS
+6         ASSIGN_KEY                      STORE
+6         NUMBER                          100
+6         ASSIGN_VAR_KEY                  IN
+6         IDENTIFIER                      y
+6         END_OF_STATEMENT                EOS
+7         OUTPUT_WITH_LINE                PRINTLN
+7         IDENTIFIER                      x
+7         END_OF_STATEMENT                EOS
+8         OUTPUT                          PRINT
+8         IDENTIFIER                      y
+8         END_OF_STATEMENT                EOS
+9         PROGRAM_END                     END
+10        END_OF_FILE                     EOF
 
 ================= SYMBOLS TABLE =================
+
 VARIABLE NAME       TYPE        VALUE
-x                   NUMBER      0
+stringmo            STRING      I have a pen
+x                   INTEGER     1
+y                   INTEGER     100
 
 ======== INTERPOL INTERPRETER TERMINATED ========

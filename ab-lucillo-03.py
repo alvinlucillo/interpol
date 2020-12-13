@@ -511,7 +511,7 @@ def main():
     output_message_end = "\n<----------------- OUTPUT END -------------------"
     token_list_header = "\n========= INTERPOL LEXEMES/TOKENS TABLE =========\n"
     token_list_columns = "LINE NO.  TOKENS                          LEXEMES"
-    symbol_list_header = "\n================= SYMBOLS TABLE ================="
+    symbol_list_header = "\n================= SYMBOLS TABLE =================\n"
     symbol_list_columns = "VARIABLE NAME       TYPE        VALUE"
     termination_message = "\n======== INTERPOL INTERPRETER TERMINATED ========"
 
@@ -564,7 +564,7 @@ def main():
 
         for variable in parser.variables:
             var = parser.variables[variable]
-            typ = "NUMBER" if var.type is TokenType.NUMBER else "STRING"
+            typ = "INTEGER" if var.type is TokenType.NUMBER else "STRING"
 
             print(str(var.name).ljust(20) + str(typ).ljust(12) + str(var.value))
 

@@ -11,7 +11,7 @@ Enter INTERPOL file (.ipol): ================ INTERPOL OUTPUT ================
 LINE NO.  TOKENS                          LEXEMES
 1         PROGRAM_BEGIN                   BEGIN
 1         END_OF_STATEMENT                EOS
-2         DECLARATION_STRING              VARINT
+2         DECLARATION_STRING              VARSTR
 2         IDENTIFIER                      x
 2         END_OF_STATEMENT                EOS
 3         INPUT                           INPUT
@@ -21,6 +21,7 @@ LINE NO.  TOKENS                          LEXEMES
 5         END_OF_FILE                     EOF
 
 ================= SYMBOLS TABLE =================
+
 VARIABLE NAME       TYPE        VALUE
 x                   STRING      hello world
 
