@@ -1,0 +1,135 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): ================ INTERPOL OUTPUT ================
+
+----------------  OUTPUT START  ---------------->
+I have a pen
+Enter year of birth: You are 33
+x = 102
+y = 100
+ROOT RAISE 2 2 2 = 1
+MEAN 1 2 3 4 5 6 = 3
+
+<----------------- OUTPUT END -------------------
+
+========= INTERPOL LEXEMES/TOKENS TABLE =========
+
+LINE NO.  TOKENS                          LEXEMES
+1         PROGRAM_BEGIN                   BEGIN
+1         END_OF_STATEMENT                EOS
+2         END_OF_STATEMENT                EOS
+3         DECLARATION_STRING              VARSTR
+3         IDENTIFIER                      inputString
+3         DECLARATION_ASSIGN_WITH_KEY     WITH
+3         STRING                          I have a pen
+3         END_OF_STATEMENT                EOS
+4         OUTPUT_WITH_LINE                PRINTLN
+4         IDENTIFIER                      inputString
+4         END_OF_STATEMENT                EOS
+5         END_OF_STATEMENT                EOS
+6         OUTPUT                          PRINT
+6         STRING                          Enter year of birth: 
+6         END_OF_STATEMENT                EOS
+7         DECLARATION_INT                 VARINT
+7         IDENTIFIER                      birthyear
+7         END_OF_STATEMENT                EOS
+8         INPUT                           INPUT
+8         IDENTIFIER                      birthyear
+8         END_OF_STATEMENT                EOS
+9         DECLARATION_STRING              VARSTR
+9         IDENTIFIER                      lit
+9         DECLARATION_ASSIGN_WITH_KEY     WITH
+9         STRING                          You are 
+9         END_OF_STATEMENT                EOS
+10        DECLARATION_INT                 VARINT
+10        IDENTIFIER                      year
+10        DECLARATION_ASSIGN_WITH_KEY     WITH
+10        NUMBER                          2019
+10        END_OF_STATEMENT                EOS
+11        OUTPUT                          PRINT
+11        IDENTIFIER                      lit
+11        END_OF_STATEMENT                EOS
+12        OUTPUT_WITH_LINE                PRINTLN
+12        BASIC_OPERATOR_SUB              SUB
+12        IDENTIFIER                      year
+12        IDENTIFIER                      birthyear
+12        END_OF_STATEMENT                EOS
+13        END_OF_STATEMENT                EOS
+14        DECLARATION_INT                 VARINT
+14        IDENTIFIER                      x
+14        DECLARATION_ASSIGN_WITH_KEY     WITH
+14        BASIC_OPERATOR_ADD              ADD
+14        NUMBER                          100
+14        BASIC_OPERATOR_SUB              SUB
+14        NUMBER                          9
+14        NUMBER                          7
+14        END_OF_STATEMENT                EOS
+15        DECLARATION_INT                 VARINT
+15        IDENTIFIER                      y
+15        END_OF_STATEMENT                EOS
+16        ASSIGN_KEY                      STORE
+16        NUMBER                          100
+16        ASSIGN_VAR_KEY                  IN
+16        IDENTIFIER                      y
+16        END_OF_STATEMENT                EOS
+17        OUTPUT                          PRINT
+17        STRING                          x = 
+17        END_OF_STATEMENT                EOS
+18        OUTPUT_WITH_LINE                PRINTLN
+18        IDENTIFIER                      x
+18        END_OF_STATEMENT                EOS
+19        OUTPUT                          PRINT
+19        STRING                          y = 
+19        END_OF_STATEMENT                EOS
+20        OUTPUT_WITH_LINE                PRINTLN
+20        IDENTIFIER                      y
+20        END_OF_STATEMENT                EOS
+21        END_OF_STATEMENT                EOS
+22        DECLARATION_INT                 VARINT
+22        IDENTIFIER                      m
+22        END_OF_STATEMENT                EOS
+23        ASSIGN_KEY                      STORE
+23        NUMBER                          2
+23        ASSIGN_VAR_KEY                  IN
+23        IDENTIFIER                      m
+23        END_OF_STATEMENT                EOS
+24        END_OF_STATEMENT                EOS
+25        OUTPUT                          PRINT
+25        STRING                          ROOT RAISE 2 2 2 = 
+25        END_OF_STATEMENT                EOS
+26        OUTPUT_WITH_LINE                PRINTLN
+26        ADVANCED_OPERATOR_ROOT          ROOT
+26        ADVANCED_OPERATOR_EXP           RAISE
+26        IDENTIFIER                      m
+26        IDENTIFIER                      m
+26        IDENTIFIER                      m
+26        END_OF_STATEMENT                EOS
+27        END_OF_STATEMENT                EOS
+28        OUTPUT                          PRINT
+28        STRING                          MEAN 1 2 3 4 5 6 = 
+28        END_OF_STATEMENT                EOS
+29        OUTPUT_WITH_LINE                PRINTLN
+29        ADVANCED_OPERATOR_AVE           MEAN
+29        NUMBER                          1
+29        NUMBER                          2
+29        NUMBER                          3
+29        NUMBER                          4
+29        NUMBER                          5
+29        NUMBER                          6
+29        END_OF_STATEMENT                EOS
+30        END_OF_STATEMENT                EOS
+31        PROGRAM_END                     END
+32        END_OF_FILE                     EOF
+
+================= SYMBOLS TABLE =================
+
+VARIABLE NAME       TYPE        VALUE
+inputString         STRING      I have a pen
+birthyear           INTEGER     1986
+lit                 STRING      You are 
+year                INTEGER     2019
+x                   INTEGER     102
+y                   INTEGER     100
+m                   INTEGER     2
+
+======== INTERPOL INTERPRETER TERMINATED ========

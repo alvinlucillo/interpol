@@ -4,23 +4,26 @@ import pathlib
 
 def main():
 
-    testdata = [[], [], ["12\n"]]
+    testcase = ["testcase\\tc1.ipol", "testcase\\tc2.ipol", "testcase\\tc3.ipol", "testcase\\tc4.ipol",
+                "testcase\\tc5_invalidfile.txt", "testcase\\tc6.ipol", "testcase\\tc7.ipol"]
+    testdata = [[], [], ["12\n"], ["1986\n"], [], [], []]
 
     tc = 0
     successful = 0
-    for data in testdata:
+    for tcase in testcase:
         tc = tc + 1
-        if run_test(tc, data, True, True, True):
+        if run_test(tcase, tc, testdata[tc-1], True, False, True):
             successful = successful + 1
 
-    print("\n#####################################\nSuccesful cases over total cases: " + str(successful) + "/" +
+    print("\n#####################################\nSuccessful cases over total cases: " + str(successful) + "/" +
           str(tc) + "\n#####################################")
 
 
-def run_test(tc, input_data=None, show_result=False, formatted=False, show_difference=False):
-    process = subprocess.Popen(["python", "ab-lucillo-03.py"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+def run_test(tc, tc_no, input_data=None, show_result=False, formatted=False, show_difference=False):
+    file_path = pathlib.Path(str(pathlib.Path(__file__).parent.absolute()), "ab-lucillo-03.py")
+    process = subprocess.Popen(["python", file_path], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
-    src = "testcase\\tc" + str(tc) + ".ipol\n"
+    src = tc + "\n"
     process.stdin.write(str.encode(src))
 
     if input_data is not None and len(input_data) > 0:
@@ -31,7 +34,7 @@ def run_test(tc, input_data=None, show_result=False, formatted=False, show_diffe
 
     process.stdin.close()
 
-    file_name = "testcase/tc" + str(tc) + "_result.txt"
+    file_name = "testcase\\tc" + str(tc_no) + "_result.txt"
     file_path = pathlib.Path(str(pathlib.Path(__file__).parent.absolute()), file_name)
 
     file = open(file_path, 'r')
@@ -39,7 +42,7 @@ def run_test(tc, input_data=None, show_result=False, formatted=False, show_diffe
     repr_expected = repr(expected)
     repr_result = str(repr(output)).replace("\\r", "")
 
-    print("\n************\nTEST CASE #" + str(tc) + "\n************")
+    print("\n************\nTEST CASE #" + str(tc_no) + "\n************")
 
     successful = repr_expected == repr_result
 

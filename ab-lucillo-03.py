@@ -42,7 +42,7 @@ keywords = ["BEGIN", "END", "VARSTR", "VARINT",
             "WITH", "STORE", "IN", "INPUT",
             "PRINT", "PRINTLN", "ADD", "SUB",
             "MUL", "DIV", "MOD", "RAISE",
-            "ROOT", "MEAN", "DIST", "AND"];
+            "ROOT", "MEAN", "DIST", "AND"]
 
 types = [11, 12, 16, 17,
          18, 19, 20, 21,
@@ -85,9 +85,6 @@ class Lexer:
         self.line_no = 1
         self.line = ""
 
-    def get_line(self):
-        return self.line
-
     # Move to the next character
     def next_char(self):
         if (self.index + 1) < len(self.code):
@@ -97,8 +94,8 @@ class Lexer:
             self.line += self.char
 
             # Check if the character is an acceptable ASCII code
-            if not self.is_printable_ascii_char():
-                self.throw_error()
+            if not self.is_printable_ascii_char(self.char):
+                raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.line_no, self.line)
         else:
             self.char = None
 
@@ -120,7 +117,7 @@ class Lexer:
 
                 if token_type is not None:
                     token = Token(token_type, text, self.line_no)
-                elif text.isalpha() and len(text) < 50 and text[0].islower():
+                elif text[0].isalpha() and len(text) < 50 and self.is_printable_ascii_string(text):
                     token = Token(TokenType.IDENTIFIER, text, self.line_no)
                 else:
                     raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.line_no, self.line)
@@ -130,7 +127,7 @@ class Lexer:
                 text = self.advance_chars('"')
 
                 if not (len(text) > 1 and text[0] == '"' and text[len(text) - 1] == '"'):
-                    self.throw_error()
+                    raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.line_no, self.line)
 
                 text = text[1:len(text)-1]
 
@@ -148,7 +145,12 @@ class Lexer:
 
                 token = Token(TokenType.NUMBER, text, self.line_no)
 
-            # Delimiter
+            # If starts with #, it is a comment
+            elif self.char == "#":
+                # Advance chars until newline is reached
+                self.advance_chars('\n')
+
+            # End of statement reached
             elif self.char == "\n":
                 token = Token(TokenType.END_OF_STATEMENT, "EOS", self.line_no)
                 self.line_no += 1
@@ -169,12 +171,14 @@ class Lexer:
     # Returns characters before any whitespace
     def advance_chars(self, delimiter=None):
         start_pos = self.index
+
         # Continue until EOL, delimiter is reached or space is reached
         while self.next_char() is not None and \
                 ((not self.char.isspace() and delimiter is None) or
                  (delimiter is not None))\
                 and not self.char == delimiter:
             pass
+
         # If loop above terminates due to space, move back cursor to last non-space char
         if self.char is not None and self.char.isspace():
             self.index -= 1
@@ -182,12 +186,19 @@ class Lexer:
 
         return self.code[start_pos: self.index + 1]
 
-    # Returns true if char is in printable ASCII chart except for tab
-    def is_printable_ascii_char(self):
-        return 32 <= ord(self.char) <= 126 or 9 <= ord(self.char) <= 10
+    # Returns true if char is in printable ASCII chart including tab and new line
+    @staticmethod
+    def is_printable_ascii_char(c, include_tab_nl_cr=True):
+        if include_tab_nl_cr:
+            return 32 <= ord(c) <= 126 or 9 <= ord(c) <= 10 or ord(c) == 13
+        else:
+            return 32 <= ord(c) <= 126
 
-    def throw_error(self, token):
-        raise InterpreterError
+    def is_printable_ascii_string(self, string):
+        for c in string:
+            if not self.is_printable_ascii_char(c, False):
+                return False
+        return True
 
 
 class Parser:
@@ -196,11 +207,15 @@ class Parser:
         self.token = None
         self.tokens = []
         self.variables = {}
+        self.has_begin = False
+        self.has_end = False
+        self.prev_line = ""
 
     def get_current_line(self): return self.lexer.line
-    def clear_current_line(self): self.lexer.line = ""
 
-    def get_tokens(self): return self.tokens
+    def clear_current_line(self):
+        self.prev_line = self.lexer.line
+        self.lexer.line = ""
 
     def variable_exists(self, name): return name in self.variables
 
@@ -208,15 +223,16 @@ class Parser:
         if self.variable_exists(name):
             raise InterpreterError(InterpreterError.DUPLICATE_VARIABLE, self.token.line_no, self.get_current_line())
 
-        error = self.check_data_type_compatibility_errors(token_type, value)
+        if value is not None:
+            error = self.check_data_type_compatibility_errors(token_type, value)
 
-        if error == 2:
-            raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
-        if error == 1:
-            raise InterpreterError(InterpreterError.INVALID_DATA_TYPE, self.token.line_no, self.get_current_line())
+            if error == 2:
+                raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
+            if error == 1:
+                raise InterpreterError(InterpreterError.INVALID_DATA_TYPE, self.token.line_no, self.get_current_line())
 
-        if token_type == TokenType.NUMBER:
-            value = int(value)
+            if token_type == TokenType.NUMBER:
+                value = int(value)
 
         variable = Variable(name, token_type, value)
         self.variables[name] = variable
@@ -280,8 +296,17 @@ class Parser:
     def execute(self):
         try:
             while self.next_token().type is not TokenType.END_OF_FILE:
+
+                if self.token.type is TokenType.END_OF_STATEMENT:
+                    continue
+
+                if not self.has_begin and self.token.type is not TokenType.PROGRAM_BEGIN or self.has_end:
+                    raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
                 if self.token.type is TokenType.PROGRAM_BEGIN:
+                    self.has_begin = True
                     self.next_token()
+
                 elif self.token.type is TokenType.OUTPUT or self.token.type is TokenType.OUTPUT_WITH_LINE:
                     if self.token.type is TokenType.OUTPUT:
                         self.print("")
@@ -298,15 +323,18 @@ class Parser:
                     self.input()
 
                 elif self.token.type is TokenType.PROGRAM_END:
-                    self.next_token()
-                    break
+                    self.has_end = True
 
-                if self.token.type is not TokenType.END_OF_STATEMENT and \
-                        self.next_token().type is not TokenType.END_OF_STATEMENT:
-                    raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no,
-                                           self.get_current_line())
+                elif self.token.is_arithmetic_operator():
+                    self.evaluate_expression()
 
+                if self.token.type is not TokenType.END_OF_STATEMENT:
+                    # raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+                    pass
                 self.clear_current_line()
+            else:
+                if not self.has_end:
+                    raise InterpreterError(InterpreterError.INVALID_EOF, self.token.line_no-1, self.prev_line)
 
         except InterpreterError as e:
             print(str(e), end="")
@@ -316,7 +344,7 @@ class Parser:
 
         if not (self.token.is_arithmetic_operator() or self.token.type is TokenType.IDENTIFIER or
                 self.token.type is TokenType.NUMBER or self.token.type is TokenType.STRING):
-            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+            raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
 
         value = None
 
@@ -400,6 +428,9 @@ class Parser:
         self.next_token()
         expression_result = self.evaluate_expression()
 
+        if expression_result is None:
+            raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
+
         operator = self.next_token()
 
         if operator.type is not TokenType.ASSIGN_VAR_KEY:
@@ -432,7 +463,6 @@ class Parser:
 
         if declaration_type.type is TokenType.DECLARATION_INT:
             variable_type = TokenType.NUMBER
-            value = 0 if value is None else value
         else:
             variable_type = TokenType.STRING
             value = "" if value is None else value
@@ -472,6 +502,9 @@ class Parser:
         expression = self.next_token()
 
         value = self.evaluate_expression()
+
+        if value is None:
+            raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
 
         print(value, end=_end)
 
@@ -517,8 +550,8 @@ def main():
 
     print(welcome_message)
 
-    file_path = input("Enter INTERPOL file (.ipol): ")
-    # file_path = "test1.ipol"
+    # file_path = input("Enter INTERPOL file (.ipol): ")
+    file_path = "input1.ipol"
     contents = None
 
     # Use the path relative to this script if path is not absolute
@@ -527,23 +560,22 @@ def main():
 
     if not pathlib.Path(file_path).suffix == ".ipol":
         print(InterpreterError.INVALID_FILE)
-        return
 
-    if not os.path.isfile(file_path):
+    elif not os.path.isfile(file_path):
         print(InterpreterError.FILE_NOT_FOUND)
-        return
 
-    if not os.path.getsize(file_path) > 0:
+    elif not os.path.getsize(file_path) > 0:
         print(InterpreterError.FILE_EMPTY)
-        return
 
-    file = open(file_path, 'r')
-    contents = file.read()
+    else:
+        file = open(file_path, 'r', encoding='utf-8')
+        contents = file.read()
 
     if contents is not None:
         print(output_message)
         print(output_message_start)
 
+        # lexer = Lexer(str(contents, "utf-8"))
         lexer = Lexer(contents)
         parser = Parser(lexer)
 
@@ -567,10 +599,10 @@ def main():
         for variable in parser.variables:
             var = parser.variables[variable]
             typ = "INTEGER" if var.type is TokenType.NUMBER else "STRING"
+            val = "" if var.value is None else str(var.value)
+            print(str(var.name).ljust(20) + str(typ).ljust(12) + val)
 
-            print(str(var.name).ljust(20) + str(typ).ljust(12) + str(var.value))
-
-        print(termination_message, end="")
+    print(termination_message, end="")
 
 
 # Execute INTERPOL program automatically if running the module itself
