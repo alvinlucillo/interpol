@@ -55,20 +55,7 @@ def run_test(tc, tc_no, input_data=None, show_result=False, formatted=False, sho
             expected_result = expected
 
         print("Output: \n" + result)
-        print("\nExpected: \n" + expected_result)
-
-    if show_difference and not successful:
-        ch_cnt = 0
-        ch = ""
-        ch1 = ""
-        for c in repr_expected:
-            ch = ch + c
-            ch1 = ch1 + repr_result[ch_cnt]
-            if c != repr_result[ch_cnt]:
-                print("Difference detected. See last char.\nExpected " + ch + "\nResult:  " + ch1)
-                break
-
-            ch_cnt = ch_cnt + 1
+        print("Expected: \n" + expected_result)
 
     print("\nSUCCESSFUL: " + str(successful))
 

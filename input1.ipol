@@ -1,3 +1,4 @@
 BEGIN
-PRINTLN "
-END
+VARINT x
+ADD 1 1
+# comment
