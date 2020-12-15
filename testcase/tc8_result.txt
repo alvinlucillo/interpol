@@ -1,0 +1,5 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): Invalid file
+
+======== INTERPOL INTERPRETER TERMINATED ========

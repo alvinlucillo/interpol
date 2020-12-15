@@ -147,7 +147,7 @@ class Lexer:
 
         return self.char
 
-    # Move to next token
+    # Get the next token
     def next_token(self):
         token = None
 
@@ -286,6 +286,7 @@ class Parser:
         self.prev_non_eos_line = None       # Contains the previous executable statement; used for Invalid end of file
         self.prev_non_eos_lineno = None     # Contains the previous line number of an executable statement
         self.longest_variable_length = 0    # Contains the longest variable name length for symbols table
+        self.store_op_in_use = False        # Flags that STORE operation is in use
 
     # Main parser logic that checks each token and calls its corresponding method for further evaluation
     def execute(self):
@@ -294,8 +295,9 @@ class Parser:
         try:
             while True:
                 # Make sure the first executable statement is BEGIN
-                if not self.has_begin and not TokenType.END_OF_STATEMENT \
-                        and self.token.type is not TokenType.PROGRAM_BEGIN or self.has_end:
+                if not self.has_begin and self.token.type is not TokenType.END_OF_STATEMENT \
+                        and self.token.type is not TokenType.PROGRAM_BEGIN or \
+                        (self.has_end and self.token.type is TokenType.PROGRAM_END):
                     raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
 
                 if self.token.type is TokenType.PROGRAM_BEGIN:
@@ -334,13 +336,13 @@ class Parser:
                 # Skip to evaluation of token above if this is a completely new statement
                 if prev_token.type is TokenType.END_OF_STATEMENT and self.token.type is not TokenType.END_OF_FILE:
                     continue
-
+                # If end of file is reached, check if END was encountered, then terminate the loop
                 if self.token.type is TokenType.END_OF_FILE:
                     if not self.has_end:
                         raise InterpreterError(InterpreterError.INVALID_EOF, self.prev_non_eos_lineno,
                                                self.prev_non_eos_line)
                     break
-
+                # Expects that each method above should end with EOS
                 if self.token.type is not TokenType.END_OF_STATEMENT:
                     raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
 
@@ -349,11 +351,15 @@ class Parser:
             print(('\n' if not self.prev_print_has_newline else '') + str(e), end="")
 
     # Evaluates the expression to reach its value through recursion algorithm
+    # This is where literal values, variables, and arithmetic operators are evaluated
     def evaluate_expression(self):
-
-        if not (self.token.is_arithmetic_operator() or self.token.type is TokenType.IDENTIFIER or
-                self.token.type is TokenType.NUMBER or self.token.type is TokenType.STRING):
+        # Expression error if it is an incomplete expression (i.e. EOS is reached)
+        if self.token.type is TokenType.END_OF_STATEMENT:
             raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
+        # Syntax error if it not a valid token in an expression
+        elif not (self.token.is_arithmetic_operator() or self.token.type is TokenType.IDENTIFIER or
+                  self.token.type is TokenType.NUMBER or self.token.type is TokenType.STRING):
+            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
 
         value = None
 
@@ -375,6 +381,7 @@ class Parser:
         if self.token.has_two_operators():
             return self.two_operators_arithmetic()
 
+        # Checks the syntax for: MEAN <expr1> <expr2> <expr3> … <exprn>
         elif self.token.type is TokenType.ADVANCED_OPERATOR_AVE:
             count = 0
             sum_of_value = 0
@@ -382,6 +389,9 @@ class Parser:
             self.next_token()
 
             while self.token.type is not TokenType.END_OF_STATEMENT:
+                if self.token.type is TokenType.ASSIGN_VAR_KEY and self.store_op_in_use:
+                    break
+
                 value = self.evaluate_expression()
                 self.check_compatibility(TokenType.NUMBER, value)
 
@@ -396,7 +406,7 @@ class Parser:
                                        self.get_current_line())
 
             return result
-
+        # Checks the syntax for: DIST <expr1> <expr2> AND <expr3> <expr4>
         elif self.token.type is TokenType.ADVANCED_OPERATOR_DIST:
             self.next_token()
             expr1 = self.evaluate_expression()
@@ -429,7 +439,7 @@ class Parser:
                 raise InterpreterError(InterpreterError.INVALID_ARITHMETIC_OPERATION, self.token.line_no,
                                        self.get_current_line())
             return result
-
+        # If the evaluation result is None (including the variable value), it is an expression error
         if value is None or (value is not None and type(value) is Value and value.value is None):
             raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
 
@@ -463,13 +473,10 @@ class Parser:
     # Checks this syntax: STORE <expression> IN <variable>
     def store(self):
         self.next_token()
+        self.store_op_in_use = True
         expr = self.evaluate_expression()
 
-        # No value evaluated from the expression
-        if expr is None:
-            raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
-
-        operator = self.next_token()
+        operator = self.token if self.token.type is TokenType.ASSIGN_VAR_KEY else self.next_token()
 
         # Not using IN operator
         if operator.type is not TokenType.ASSIGN_VAR_KEY:
@@ -482,6 +489,7 @@ class Parser:
             raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
 
         self.assign_value_variable(identifier.value, expr)
+        self.store_op_in_use = False
 
     # Method to be called for VARINT and VARSTR statements
     # Checks for these syntaxes:
@@ -550,7 +558,6 @@ class Parser:
         operand2 = int(operand2.value)
 
         try:
-
             if operator == TokenType.BASIC_OPERATOR_ADD:
                 return Value(TokenType.NUMBER, operand1 + operand2)
             if operator == TokenType.BASIC_OPERATOR_SUB:
@@ -640,8 +647,8 @@ def main():
 
     print(welcome_message)
 
-    # file_path = input("Enter INTERPOL file (.ipol): ")
-    file_path = "input1.ipol"
+    file_path = input("Enter INTERPOL file (.ipol): ")
+    # file_path = "input2.ipol"
     contents = None
 
     # Use the path relative to this script if path is not absolute
