@@ -1,0 +1,77 @@
+BEGIN
+
+PRINTLN "Hi, what is your name?"
+
+VARSTR name
+INPUT name
+
+PRINTLN ""
+
+PRINT "Welcome, "
+PRINT name
+PRINTLN ", to INTERPOL!"
+PRINTLN ""
+
+PRINTLN "INTERPOL accepts integers or string (for basic operations) or expression(s) (for complex operations) to peform operations such as print, basic and advanced mathematics, and declaring and storing values to variables."
+PRINTLN ""
+
+PRINTLN ""
+PRINTLN "##### BASIC OPERATIONS #####"
+PRINTLN ""
+
+PRINTLN "> For printing:"
+PRINTLN "\tYou can provide strings enclosed in quotations and use the keywords: "
+PRINTLN "\t\t- PRINT for printing without new line"
+PRINTLN "\t\t- PRINTLN for printing with new line"
+PRINTLN ""
+PRINTLN "\tThe basic expression is KEYWORD<space><expression>, WHERE <expression> is enclosed in quotations"
+PRINTLN ""
+
+PRINTLN "> For basic mathematics:"
+PRINTLN "\tYou can provide two integers (only integers are accepted) separated by a space."
+PRINTLN "\tThe KEYWORDS are:"
+PRINTLN "\t\t- ADD for addition"
+PRINTLN "\t\t- SUB for subtraction"
+PRINTLN "\t\t- MUL for multiplication"
+PRINTLN "\t\t- DIV for division"
+PRINTLN "\t\t- MOD for modulo"
+PRINTLN "\tThe basic expression is KEYWORD<space><integer><space><integer>"
+PRINTLN ""
+
+PRINTLN "> For advanced mathematics:"
+PRINTLN "\tParameters (integers only) for advanced mathematics vary depending on the keyword used."
+PRINTLN "\tThe KEYWORDS and the required number of parameters are:"
+PRINTLN "\t\t- RAISE <integer1> <integer2> --> performs exponentiation where <integer1> is raised to the <inter2>th power"
+PRINTLN "\t\t- ROOT <integer1> <integer2> --> performs root computation where <integer2> is the root"
+PRINTLN "\t\t- MEAN <interger1> ... <integerN> --> performs average computation of all integers provided. This doesn't have a definite number of parameters."
+PRINTLN "\t\t- DIST <integer1> <integer2> AND <integer3> <integer4> --> performs distance computation where <integer1> and <integer2> signifies point1 and <integer3> and <integer4> signifies point2."
+PRINTLN ""
+
+PRINTLN "> For variable declaration and storing of values:"
+PRINTLN "\tVariables can be declared anywhere in the source code as long as they're inside the BEGIN and END keywords, otherwise, INTERPOL will not consider the declared variable(s) and everything outside the scope. Variables are global by default. They could accept either integer or string (for basic operations) or expression(s) (for complex operations). INTERPOL can also accept user-input to be automatically stored in a variable. INTERPOL variables follow strong typing."
+PRINTLN "\tThe KEYWORDS are:"
+PRINTLN "\t\t- VARINT for integer"
+PRINTLN "\t\t- VARSTR for string"
+PRINTLN "\t\t- INPUT for user-input and requires existing variable"
+PRINTLN "\t\t- STORE for storing a value to a variable and requires existing variable. The value to persist to the provided variable name after the keyword, IN, must have the same data type as that of the provided variable name."
+PRINTLN "\tThe basic expression varies per keyword:"
+PRINTLN "\t\t- VARINT <variable_name> or VARINT <variable_name> WITH <integer>"
+PRINTLN "\t\t- VARSTR <variable_name> or VARSTR <variable_name> WITH <string>"
+PRINTLN "\t\t- INPUT <variable_name>"
+PRINTLN "\t\t- STORE <value> IN <variable_name>"
+PRINTLN ""
+
+PRINTLN ""
+PRINTLN "##### ADVANCED OPERATIONS #####"
+PRINTLN ""
+
+PRINTLN "INTERPOL can accept <expressions> within <expressions>, such that:"
+PRINTLN "\tFor printing:"
+PRINTLN "\t\tPRINTLN PRINT <string>"
+PRINTLN "\tFor math:"
+PRINTLN "\t\tADD <integer1> ADD <integer1> <integer2>"
+PRINTLN "\tFor variables:"
+PRINTLN "\t\tVARINT <variable_name> WITH ADD <integer1> <integer2>"
+PRINTLN ""
+
+END

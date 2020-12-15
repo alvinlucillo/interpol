@@ -1,0 +1,88 @@
+BEGIN
+
+VARSTR song_title
+VARSTR singer
+VARSTR new_line WITH "\n"
+
+STORE "Hey Jude" IN song_title
+STORE "The Beatles" IN singer
+
+PRINTLN song_title
+PRINTLN singer
+PRINT new_line
+
+PRINT "Hey, "
+PRINT PRINT "hey, "
+PRINTLN PRINTLN PRINTLN "he-he-he-hey!\n"
+
+VARSTR hey_jude WITH "Hey, Jude "
+VARSTR make_it_better WITH "to make it better"
+
+PRINTLN "VERSE I"
+PRINT new_line
+PRINT PRINT hey_jude
+PRINTLN PRINT PRINT PRINT "don't make it bad"
+PRINT PRINT PRINT PRINT "Take a sad song "
+PRINTLN PRINT PRINT PRINT PRINT  "and make it better"
+
+VARSTR remember WITH PRINT PRINT PRINT PRINT PRINT PRINT "Remember "
+VARSTR let_her_into_your_heart
+STORE PRINT PRINT PRINT PRINT PRINT PRINT PRINT "to let her into your heart" IN let_her_into_your_heart
+VARSTR start WITH PRINT PRINT PRINT PRINT PRINT PRINT PRINT PRINT "Then you can start "
+
+PRINT remember 
+PRINTLN let_her_into_your_heart
+PRINT start
+PRINTLN make_it_better
+
+PRINT new_line
+
+PRINTLN "VERSE II"
+PRINT new_line
+PRINT PRINT PRINT PRINT PRINT PRINT PRINT PRINT PRINT hey_jude
+PRINTLN PRINT PRINT PRINT PRINT PRINT PRINT "don't be afraid"
+PRINT PRINT PRINT PRINT PRINT PRINT "You were made to "
+PRINTLN PRINT PRINT PRINT PRINT  "go out and get her"
+PRINT PRINT PRINT PRINT "The minute "
+PRINTLN PRINT PRINT PRINT "you let her under your skin"
+PRINT PRINT PRINT "Then you begin "
+PRINTLN PRINT make_it_better
+
+PRINT new_line
+
+PRINTLN "VERSE III"
+PRINT new_line
+PRINTLN PRINT PRINT PRINT PRINT PRINT PRINT "and anytime you feel the pain"
+PRINT PRINT PRINT PRINT PRINT PRINT hey_jude
+PRINTLN PRINT PRINT PRINT PRINT  "refrain"
+PRINT PRINT PRINT PRINT "Don't carry the world "
+PRINTLN PRINT PRINT PRINT "upon your shoulder"
+PRINTLN PRINT PRINT "For well you know that it's a fool"
+PRINTLN PRINT "Who plays it cool"
+PRINTLN PRINT PRINT "By making his world a little colder"
+
+PRINT new_line
+
+PRINTLN "Na"
+PRINTLN new_line
+
+PRINTLN "VERSE IV"
+PRINT new_line
+PRINT PRINT hey_jude
+PRINTLN PRINT PRINT PRINT "don't let me down"
+PRINT PRINT PRINT PRINT "She has found you, "
+PRINTLN PRINT PRINT PRINT PRINT  "now go and get her"
+PRINT remember
+PRINTLN PRINT let_her_into_your_heart
+PRINT start
+PRINTLN make_it_better
+
+VARSTR better WITH "Better"
+
+PRINT better
+PRINT ", "
+PRINT better
+PRINT ", "
+PRINT better
+
+END

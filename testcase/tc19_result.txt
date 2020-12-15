@@ -1,0 +1,66 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): 
+================ INTERPOL OUTPUT ================
+
+----------------  OUTPUT START  ---------------->
+Hey Jude
+The Beatles
+\nHey, 
+Invalid expression at line number [ 15 ]
+ ----> PRINT PRINT
+<----------------- OUTPUT END -------------------
+
+========= INTERPOL LEXEMES/TOKENS TABLE =========
+
+LINE NO.  TOKENS                          LEXEMES
+1         PROGRAM_BEGIN                   BEGIN
+1         END_OF_STATEMENT                EOS
+2         END_OF_STATEMENT                EOS
+3         DECLARATION_STRING              VARSTR
+3         IDENTIFIER                      song_title
+3         END_OF_STATEMENT                EOS
+4         DECLARATION_STRING              VARSTR
+4         IDENTIFIER                      singer
+4         END_OF_STATEMENT                EOS
+5         DECLARATION_STRING              VARSTR
+5         IDENTIFIER                      new_line
+5         DECLARATION_ASSIGN_WITH_KEY     WITH
+5         STRING                          \n
+5         END_OF_STATEMENT                EOS
+6         END_OF_STATEMENT                EOS
+7         ASSIGN_KEY                      STORE
+7         STRING                          Hey Jude
+7         ASSIGN_VAR_KEY                  IN
+7         IDENTIFIER                      song_title
+7         END_OF_STATEMENT                EOS
+8         ASSIGN_KEY                      STORE
+8         STRING                          The Beatles
+8         ASSIGN_VAR_KEY                  IN
+8         IDENTIFIER                      singer
+8         END_OF_STATEMENT                EOS
+9         END_OF_STATEMENT                EOS
+10        OUTPUT_WITH_LINE                PRINTLN
+10        IDENTIFIER                      song_title
+10        END_OF_STATEMENT                EOS
+11        OUTPUT_WITH_LINE                PRINTLN
+11        IDENTIFIER                      singer
+11        END_OF_STATEMENT                EOS
+12        OUTPUT                          PRINT
+12        IDENTIFIER                      new_line
+12        END_OF_STATEMENT                EOS
+13        END_OF_STATEMENT                EOS
+14        OUTPUT                          PRINT
+14        STRING                          Hey, 
+14        END_OF_STATEMENT                EOS
+15        OUTPUT                          PRINT
+15        OUTPUT                          PRINT
+
+================= SYMBOLS TABLE =================
+
+VARIABLE NAME       TYPE        VALUE
+song_title          STRING      Hey Jude
+singer              STRING      The Beatles
+new_line            STRING      \n
+
+======== INTERPOL INTERPRETER TERMINATED ========

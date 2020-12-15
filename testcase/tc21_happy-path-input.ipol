@@ -1,0 +1,9 @@
+BEGIN
+VARSTR name
+PRINT "Enter your name: "
+INPUT name
+PRINT "Hello, "
+PRINT name
+PRINTLN "."
+PRINTLN "Welcome to INTERPOL!"
+END

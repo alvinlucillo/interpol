@@ -1,0 +1,4 @@
+BEGIN
+VARINT x WITH 0
+ROOT x 1 #This should result to an error :)
+END #END of file

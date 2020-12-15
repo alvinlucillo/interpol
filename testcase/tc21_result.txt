@@ -1,0 +1,46 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): 
+================ INTERPOL OUTPUT ================
+
+----------------  OUTPUT START  ---------------->
+Enter your name: Hello, Juan.
+Welcome to INTERPOL!
+
+<----------------- OUTPUT END -------------------
+
+========= INTERPOL LEXEMES/TOKENS TABLE =========
+
+LINE NO.  TOKENS                          LEXEMES
+1         PROGRAM_BEGIN                   BEGIN
+1         END_OF_STATEMENT                EOS
+2         DECLARATION_STRING              VARSTR
+2         IDENTIFIER                      name
+2         END_OF_STATEMENT                EOS
+3         OUTPUT                          PRINT
+3         STRING                          Enter your name: 
+3         END_OF_STATEMENT                EOS
+4         INPUT                           INPUT
+4         IDENTIFIER                      name
+4         END_OF_STATEMENT                EOS
+5         OUTPUT                          PRINT
+5         STRING                          Hello, 
+5         END_OF_STATEMENT                EOS
+6         OUTPUT                          PRINT
+6         IDENTIFIER                      name
+6         END_OF_STATEMENT                EOS
+7         OUTPUT_WITH_LINE                PRINTLN
+7         STRING                          .
+7         END_OF_STATEMENT                EOS
+8         OUTPUT_WITH_LINE                PRINTLN
+8         STRING                          Welcome to INTERPOL!
+8         END_OF_STATEMENT                EOS
+9         PROGRAM_END                     END
+10        END_OF_FILE                     EOF
+
+================= SYMBOLS TABLE =================
+
+VARIABLE NAME       TYPE        VALUE
+name                STRING      Juan
+
+======== INTERPOL INTERPRETER TERMINATED ========

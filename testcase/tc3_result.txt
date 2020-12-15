@@ -1,6 +1,7 @@
 ========  INTERPOL INTERPRETER STARTED   ========
 
-Enter INTERPOL file (.ipol): ================ INTERPOL OUTPUT ================
+Enter INTERPOL file (.ipol): 
+================ INTERPOL OUTPUT ================
 
 ----------------  OUTPUT START  ---------------->
 Enter an integer: 

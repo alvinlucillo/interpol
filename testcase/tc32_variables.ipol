@@ -1,0 +1,12 @@
+BEGIN
+VARSTR abcdefghijabcdefghijabcdefghijabcdefghijabcdefghij
+VARSTR abcdefghijabcdefghijabcdefghijabcdefghijabcdefghij
+VARSTR abcdefghijabcdefghijabcdefghijabcdefghijabcdefghij1
+VARSTR abcdefghi12345678
+VARSTR abcdefghi_4567i
+VARSTR abcdefghijabcdefgh_-123123123
+VARSTR abcdefghijabcdefghijab!
+VARSTR abcdefghijabcdefghijabcdefghija #dfasdfa
+VARSTR abcdefghijabcdefghijabcdefghija#dfasdfa
+VARSTR abc abc
+END

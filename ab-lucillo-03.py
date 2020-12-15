@@ -1,4 +1,4 @@
-# Student: Alvin Lucillo
+# Student: Lucillo, Alvin B.
 # Description: INTERPOL for IS214 Assignment #3
 
 
@@ -13,7 +13,7 @@ keywords = ["BEGIN", "END", "VARSTR", "VARINT",
             "WITH", "STORE", "IN", "INPUT",
             "PRINT", "PRINTLN", "ADD", "SUB",
             "MUL", "DIV", "MOD", "RAISE",
-            "ROOT", "MEAN", "DIST", "AND"]
+            "ROOT", "MEAN", "DIST",     "AND"]
 
 types = [11, 12, 16, 17,
          18, 19, 20, 21,
@@ -109,7 +109,7 @@ class InterpreterError(Exception):
     INVALID_EXPRESSION = "Invalid expression"
     INVALID_DATA_TYPE = "Invalid data type"
     DUPLICATE_VARIABLE = "Duplicate variable declaration"
-    INCOMPATIBLE_DATE_TYPE = "Incompatible data type"
+    INCOMPATIBLE_DATA_TYPE = "Incompatible data type"
     INVALID_DATA_TYPE_INPUT = "Invalid data type input"
     INVALID_EOF = "Invalid end of file"
     FILE_EMPTY = "File is empty"
@@ -265,9 +265,10 @@ class Lexer:
         else:
             return 32 <= ord(c) <= 126
 
-    def is_printable_ascii_string(self, string):
+    @staticmethod
+    def is_printable_ascii_string(string):
         for c in string:
-            if not self.is_printable_ascii_char(c, False):
+            if not Lexer.is_printable_ascii_char(c, False):
                 return False
         return True
 
@@ -287,6 +288,7 @@ class Parser:
         self.prev_non_eos_lineno = None     # Contains the previous line number of an executable statement
         self.longest_variable_length = 0    # Contains the longest variable name length for symbols table
         self.store_op_in_use = False        # Flags that STORE operation is in use
+        self.arith_op_in_use = False        # Flags that any of the arithmetic operations is in use
 
     # Main parser logic that checks each token and calls its corresponding method for further evaluation
     def execute(self):
@@ -329,6 +331,8 @@ class Parser:
                 # Clears the current line if end of statement is reached (i.e. it is time for the next statement)
                 if self.token.type is TokenType.END_OF_STATEMENT:
                     self.clear_current_line()
+                # Resets the flag
+                self.arith_op_in_use = False
 
                 prev_token = self.token
                 self.next_token()
@@ -353,14 +357,6 @@ class Parser:
     # Evaluates the expression to reach its value through recursion algorithm
     # This is where literal values, variables, and arithmetic operators are evaluated
     def evaluate_expression(self):
-        # Expression error if it is an incomplete expression (i.e. EOS is reached)
-        if self.token.type is TokenType.END_OF_STATEMENT:
-            raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
-        # Syntax error if it not a valid token in an expression
-        elif not (self.token.is_arithmetic_operator() or self.token.type is TokenType.IDENTIFIER or
-                  self.token.type is TokenType.NUMBER or self.token.type is TokenType.STRING):
-            raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
-
         value = None
 
         if self.token.type is TokenType.IDENTIFIER:
@@ -369,6 +365,9 @@ class Parser:
             if variable is None:
                 raise InterpreterError(InterpreterError.VARIABLE_NOT_DECLARED, self.token.line_no,
                                        self.get_current_line())
+
+            if self.arith_op_in_use is True:
+                self.check_compatibility(TokenType.NUMBER, Value(variable.type, variable.value))
 
             value = Value(variable.type, variable.value)
 
@@ -379,17 +378,20 @@ class Parser:
             value = Value(TokenType.STRING, self.token. value)
 
         if self.token.has_two_operators():
+            self.arith_op_in_use = True
             return self.two_operators_arithmetic()
 
         # Checks the syntax for: MEAN <expr1> <expr2> <expr3> … <exprn>
         elif self.token.type is TokenType.ADVANCED_OPERATOR_AVE:
+            self.arith_op_in_use = True
             count = 0
             sum_of_value = 0
 
             self.next_token()
 
             while self.token.type is not TokenType.END_OF_STATEMENT:
-                if self.token.type is TokenType.ASSIGN_VAR_KEY and self.store_op_in_use:
+                if (self.token.type is TokenType.ASSIGN_VAR_KEY and self.store_op_in_use) or \
+                        self.token.type is TokenType.DISTANCE_SEPARATOR:
                     break
 
                 value = self.evaluate_expression()
@@ -408,6 +410,8 @@ class Parser:
             return result
         # Checks the syntax for: DIST <expr1> <expr2> AND <expr3> <expr4>
         elif self.token.type is TokenType.ADVANCED_OPERATOR_DIST:
+            self.arith_op_in_use = True
+
             self.next_token()
             expr1 = self.evaluate_expression()
             self.check_compatibility(TokenType.NUMBER, expr1)
@@ -418,7 +422,7 @@ class Parser:
             self.check_compatibility(TokenType.NUMBER, expr2)
             expr2 = int(expr2.value)
 
-            operator = self.next_token()
+            operator = self.token if self.token.type is TokenType.DISTANCE_SEPARATOR else self.next_token()
 
             if operator.type is not TokenType.DISTANCE_SEPARATOR:
                 raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
@@ -467,6 +471,11 @@ class Parser:
         else:
             input_type = TokenType.STRING
 
+            if not Lexer.is_printable_ascii_string(input_value):
+                raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
+        self.check_eos()
+
         self.assign_value_variable(variable.value, Value(input_type, input_value))
 
     # Method to be called for STORE statement
@@ -476,7 +485,8 @@ class Parser:
         self.store_op_in_use = True
         expr = self.evaluate_expression()
 
-        operator = self.token if self.token.type is TokenType.ASSIGN_VAR_KEY else self.next_token()
+        operator = self.token if self.token.type in (TokenType.ASSIGN_VAR_KEY, TokenType.END_OF_STATEMENT) \
+            else self.next_token()
 
         # Not using IN operator
         if operator.type is not TokenType.ASSIGN_VAR_KEY:
@@ -488,7 +498,10 @@ class Parser:
         if identifier.type is not TokenType.IDENTIFIER:
             raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
 
+        self.check_eos()
+
         self.assign_value_variable(identifier.value, expr)
+
         self.store_op_in_use = False
 
     # Method to be called for VARINT and VARSTR statements
@@ -509,17 +522,25 @@ class Parser:
         operator = self.next_token()
 
         # Evaluate the expression if there is WITH operator
-        if operator.type is TokenType.DECLARATION_ASSIGN_WITH_KEY:
-            self.next_token()
-            value = self.evaluate_expression()
-            # No value evaluated from the expression
-            if value is None:
-                raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
+        if operator is not None:
+            if operator.type is TokenType.DECLARATION_ASSIGN_WITH_KEY:
+                self.next_token()
+                value = self.evaluate_expression()
+                # No value evaluated from the expression
+                if value is None:
+                    raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no,
+                                           self.get_current_line())
+            elif operator.type is TokenType.END_OF_STATEMENT:
+                pass
+            else:
+                raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
         # Use the corresponding literal value type depending on the Assignment operator used (VARINT/VARSTR)
         if declaration_type.type is TokenType.DECLARATION_INT:
             variable_type = TokenType.NUMBER
         else:
             variable_type = TokenType.STRING
+
+        self.check_eos()
 
         self.declare_variable(identifier.value, variable_type, value)
 
@@ -531,6 +552,8 @@ class Parser:
         # No value evaluated from the expression
         if value is None:
             raise InterpreterError(InterpreterError.INVALID_EXPRESSION, self.token.line_no, self.get_current_line())
+
+        self.check_eos()
 
         print(value.value, end=_end)
 
@@ -576,6 +599,12 @@ class Parser:
             raise InterpreterError(InterpreterError.INVALID_ARITHMETIC_OPERATION, self.token.line_no,
                                    self.get_current_line())
 
+    # Throws an error if there is an extra token at the end of a valid statement
+    def check_eos(self):
+        if self.token.type is not TokenType.END_OF_STATEMENT:
+            if self.next_token().type is not TokenType.END_OF_STATEMENT:
+                raise InterpreterError(InterpreterError.INVALID_SYNTAX, self.token.line_no, self.get_current_line())
+
     # Returns the current line being evaluated
     def get_current_line(self): return self.lexer.line
 
@@ -614,7 +643,7 @@ class Parser:
     # Checks if the value's type is the expected data type
     def check_compatibility(self, expected_data_type, value):
         if value is not None and expected_data_type is not value.type:
-            raise InterpreterError(InterpreterError.INCOMPATIBLE_DATE_TYPE, self.token.line_no, self.get_current_line())
+            raise InterpreterError(InterpreterError.INCOMPATIBLE_DATA_TYPE, self.token.line_no, self.get_current_line())
 
     # Returns the variable instance given the variable name
     def get_variable(self, name): return self.variables.get(name)
@@ -636,7 +665,7 @@ class Parser:
 # Main method executed when the script is called
 def main():
     welcome_message = "========  INTERPOL INTERPRETER STARTED   ========\n"
-    output_message = "================ INTERPOL OUTPUT ================\n"
+    output_message = "\n================ INTERPOL OUTPUT ================\n"
     output_message_start = "----------------  OUTPUT START  ---------------->"
     output_message_end = "\n<----------------- OUTPUT END -------------------"
     token_list_header = "\n========= INTERPOL LEXEMES/TOKENS TABLE =========\n"
@@ -648,7 +677,6 @@ def main():
     print(welcome_message)
 
     file_path = input("Enter INTERPOL file (.ipol): ")
-    # file_path = "input2.ipol"
     contents = None
 
     # Use the path relative to this script if path is not absolute

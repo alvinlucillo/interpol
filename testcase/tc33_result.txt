@@ -1,0 +1,280 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): 
+================ INTERPOL OUTPUT ================
+
+----------------  OUTPUT START  ---------------->
+Hi, what is your name?
+
+Welcome, Juan, to INTERPOL!
+
+INTERPOL accepts integers or string (for basic operations) or expression(s) (for complex operations) to peform operations such as print, basic and advanced mathematics, and declaring and storing values to variables.
+
+
+##### BASIC OPERATIONS #####
+
+> For printing:
+\tYou can provide strings enclosed in quotations and use the keywords: 
+\t\t- PRINT for printing without new line
+\t\t- PRINTLN for printing with new line
+
+\tThe basic expression is KEYWORD<space><expression>, WHERE <expression> is enclosed in quotations
+
+> For basic mathematics:
+\tYou can provide two integers (only integers are accepted) separated by a space.
+\tThe KEYWORDS are:
+\t\t- ADD for addition
+\t\t- SUB for subtraction
+\t\t- MUL for multiplication
+\t\t- DIV for division
+\t\t- MOD for modulo
+\tThe basic expression is KEYWORD<space><integer><space><integer>
+
+> For advanced mathematics:
+\tParameters (integers only) for advanced mathematics vary depending on the keyword used.
+\tThe KEYWORDS and the required number of parameters are:
+\t\t- RAISE <integer1> <integer2> --> performs exponentiation where <integer1> is raised to the <inter2>th power
+\t\t- ROOT <integer1> <integer2> --> performs root computation where <integer2> is the root
+\t\t- MEAN <interger1> ... <integerN> --> performs average computation of all integers provided. This doesn't have a definite number of parameters.
+\t\t- DIST <integer1> <integer2> AND <integer3> <integer4> --> performs distance computation where <integer1> and <integer2> signifies point1 and <integer3> and <integer4> signifies point2.
+
+> For variable declaration and storing of values:
+\tVariables can be declared anywhere in the source code as long as they're inside the BEGIN and END keywords, otherwise, INTERPOL will not consider the declared variable(s) and everything outside the scope. Variables are global by default. They could accept either integer or string (for basic operations) or expression(s) (for complex operations). INTERPOL can also accept user-input to be automatically stored in a variable. INTERPOL variables follow strong typing.
+\tThe KEYWORDS are:
+\t\t- VARINT for integer
+\t\t- VARSTR for string
+\t\t- INPUT for user-input and requires existing variable
+\t\t- STORE for storing a value to a variable and requires existing variable. The value to persist to the provided variable name after the keyword, IN, must have the same data type as that of the provided variable name.
+\tThe basic expression varies per keyword:
+\t\t- VARINT <variable_name> or VARINT <variable_name> WITH <integer>
+\t\t- VARSTR <variable_name> or VARSTR <variable_name> WITH <string>
+\t\t- INPUT <variable_name>
+\t\t- STORE <value> IN <variable_name>
+
+
+##### ADVANCED OPERATIONS #####
+
+INTERPOL can accept <expressions> within <expressions>, such that:
+\tFor printing:
+\t\tPRINTLN PRINT <string>
+\tFor math:
+\t\tADD <integer1> ADD <integer1> <integer2>
+\tFor variables:
+\t\tVARINT <variable_name> WITH ADD <integer1> <integer2>
+
+
+<----------------- OUTPUT END -------------------
+
+========= INTERPOL LEXEMES/TOKENS TABLE =========
+
+LINE NO.  TOKENS                          LEXEMES
+1         PROGRAM_BEGIN                   BEGIN
+1         END_OF_STATEMENT                EOS
+2         END_OF_STATEMENT                EOS
+3         OUTPUT_WITH_LINE                PRINTLN
+3         STRING                          Hi, what is your name?
+3         END_OF_STATEMENT                EOS
+4         END_OF_STATEMENT                EOS
+5         DECLARATION_STRING              VARSTR
+5         IDENTIFIER                      name
+5         END_OF_STATEMENT                EOS
+6         INPUT                           INPUT
+6         IDENTIFIER                      name
+6         END_OF_STATEMENT                EOS
+7         END_OF_STATEMENT                EOS
+8         OUTPUT_WITH_LINE                PRINTLN
+8         STRING                          
+8         END_OF_STATEMENT                EOS
+9         END_OF_STATEMENT                EOS
+10        OUTPUT                          PRINT
+10        STRING                          Welcome, 
+10        END_OF_STATEMENT                EOS
+11        OUTPUT                          PRINT
+11        IDENTIFIER                      name
+11        END_OF_STATEMENT                EOS
+12        OUTPUT_WITH_LINE                PRINTLN
+12        STRING                          , to INTERPOL!
+12        END_OF_STATEMENT                EOS
+13        OUTPUT_WITH_LINE                PRINTLN
+13        STRING                          
+13        END_OF_STATEMENT                EOS
+14        END_OF_STATEMENT                EOS
+15        OUTPUT_WITH_LINE                PRINTLN
+15        STRING                          INTERPOL accepts integers or string (for basic operations) or expression(s) (for complex operations) to peform operations such as print, basic and advanced mathematics, and declaring and storing values to variables.
+15        END_OF_STATEMENT                EOS
+16        OUTPUT_WITH_LINE                PRINTLN
+16        STRING                          
+16        END_OF_STATEMENT                EOS
+17        END_OF_STATEMENT                EOS
+18        OUTPUT_WITH_LINE                PRINTLN
+18        STRING                          
+18        END_OF_STATEMENT                EOS
+19        OUTPUT_WITH_LINE                PRINTLN
+19        STRING                          ##### BASIC OPERATIONS #####
+19        END_OF_STATEMENT                EOS
+20        OUTPUT_WITH_LINE                PRINTLN
+20        STRING                          
+20        END_OF_STATEMENT                EOS
+21        END_OF_STATEMENT                EOS
+22        OUTPUT_WITH_LINE                PRINTLN
+22        STRING                          > For printing:
+22        END_OF_STATEMENT                EOS
+23        OUTPUT_WITH_LINE                PRINTLN
+23        STRING                          \tYou can provide strings enclosed in quotations and use the keywords: 
+23        END_OF_STATEMENT                EOS
+24        OUTPUT_WITH_LINE                PRINTLN
+24        STRING                          \t\t- PRINT for printing without new line
+24        END_OF_STATEMENT                EOS
+25        OUTPUT_WITH_LINE                PRINTLN
+25        STRING                          \t\t- PRINTLN for printing with new line
+25        END_OF_STATEMENT                EOS
+26        OUTPUT_WITH_LINE                PRINTLN
+26        STRING                          
+26        END_OF_STATEMENT                EOS
+27        OUTPUT_WITH_LINE                PRINTLN
+27        STRING                          \tThe basic expression is KEYWORD<space><expression>, WHERE <expression> is enclosed in quotations
+27        END_OF_STATEMENT                EOS
+28        OUTPUT_WITH_LINE                PRINTLN
+28        STRING                          
+28        END_OF_STATEMENT                EOS
+29        END_OF_STATEMENT                EOS
+30        OUTPUT_WITH_LINE                PRINTLN
+30        STRING                          > For basic mathematics:
+30        END_OF_STATEMENT                EOS
+31        OUTPUT_WITH_LINE                PRINTLN
+31        STRING                          \tYou can provide two integers (only integers are accepted) separated by a space.
+31        END_OF_STATEMENT                EOS
+32        OUTPUT_WITH_LINE                PRINTLN
+32        STRING                          \tThe KEYWORDS are:
+32        END_OF_STATEMENT                EOS
+33        OUTPUT_WITH_LINE                PRINTLN
+33        STRING                          \t\t- ADD for addition
+33        END_OF_STATEMENT                EOS
+34        OUTPUT_WITH_LINE                PRINTLN
+34        STRING                          \t\t- SUB for subtraction
+34        END_OF_STATEMENT                EOS
+35        OUTPUT_WITH_LINE                PRINTLN
+35        STRING                          \t\t- MUL for multiplication
+35        END_OF_STATEMENT                EOS
+36        OUTPUT_WITH_LINE                PRINTLN
+36        STRING                          \t\t- DIV for division
+36        END_OF_STATEMENT                EOS
+37        OUTPUT_WITH_LINE                PRINTLN
+37        STRING                          \t\t- MOD for modulo
+37        END_OF_STATEMENT                EOS
+38        OUTPUT_WITH_LINE                PRINTLN
+38        STRING                          \tThe basic expression is KEYWORD<space><integer><space><integer>
+38        END_OF_STATEMENT                EOS
+39        OUTPUT_WITH_LINE                PRINTLN
+39        STRING                          
+39        END_OF_STATEMENT                EOS
+40        END_OF_STATEMENT                EOS
+41        OUTPUT_WITH_LINE                PRINTLN
+41        STRING                          > For advanced mathematics:
+41        END_OF_STATEMENT                EOS
+42        OUTPUT_WITH_LINE                PRINTLN
+42        STRING                          \tParameters (integers only) for advanced mathematics vary depending on the keyword used.
+42        END_OF_STATEMENT                EOS
+43        OUTPUT_WITH_LINE                PRINTLN
+43        STRING                          \tThe KEYWORDS and the required number of parameters are:
+43        END_OF_STATEMENT                EOS
+44        OUTPUT_WITH_LINE                PRINTLN
+44        STRING                          \t\t- RAISE <integer1> <integer2> --> performs exponentiation where <integer1> is raised to the <inter2>th power
+44        END_OF_STATEMENT                EOS
+45        OUTPUT_WITH_LINE                PRINTLN
+45        STRING                          \t\t- ROOT <integer1> <integer2> --> performs root computation where <integer2> is the root
+45        END_OF_STATEMENT                EOS
+46        OUTPUT_WITH_LINE                PRINTLN
+46        STRING                          \t\t- MEAN <interger1> ... <integerN> --> performs average computation of all integers provided. This doesn't have a definite number of parameters.
+46        END_OF_STATEMENT                EOS
+47        OUTPUT_WITH_LINE                PRINTLN
+47        STRING                          \t\t- DIST <integer1> <integer2> AND <integer3> <integer4> --> performs distance computation where <integer1> and <integer2> signifies point1 and <integer3> and <integer4> signifies point2.
+47        END_OF_STATEMENT                EOS
+48        OUTPUT_WITH_LINE                PRINTLN
+48        STRING                          
+48        END_OF_STATEMENT                EOS
+49        END_OF_STATEMENT                EOS
+50        OUTPUT_WITH_LINE                PRINTLN
+50        STRING                          > For variable declaration and storing of values:
+50        END_OF_STATEMENT                EOS
+51        OUTPUT_WITH_LINE                PRINTLN
+51        STRING                          \tVariables can be declared anywhere in the source code as long as they're inside the BEGIN and END keywords, otherwise, INTERPOL will not consider the declared variable(s) and everything outside the scope. Variables are global by default. They could accept either integer or string (for basic operations) or expression(s) (for complex operations). INTERPOL can also accept user-input to be automatically stored in a variable. INTERPOL variables follow strong typing.
+51        END_OF_STATEMENT                EOS
+52        OUTPUT_WITH_LINE                PRINTLN
+52        STRING                          \tThe KEYWORDS are:
+52        END_OF_STATEMENT                EOS
+53        OUTPUT_WITH_LINE                PRINTLN
+53        STRING                          \t\t- VARINT for integer
+53        END_OF_STATEMENT                EOS
+54        OUTPUT_WITH_LINE                PRINTLN
+54        STRING                          \t\t- VARSTR for string
+54        END_OF_STATEMENT                EOS
+55        OUTPUT_WITH_LINE                PRINTLN
+55        STRING                          \t\t- INPUT for user-input and requires existing variable
+55        END_OF_STATEMENT                EOS
+56        OUTPUT_WITH_LINE                PRINTLN
+56        STRING                          \t\t- STORE for storing a value to a variable and requires existing variable. The value to persist to the provided variable name after the keyword, IN, must have the same data type as that of the provided variable name.
+56        END_OF_STATEMENT                EOS
+57        OUTPUT_WITH_LINE                PRINTLN
+57        STRING                          \tThe basic expression varies per keyword:
+57        END_OF_STATEMENT                EOS
+58        OUTPUT_WITH_LINE                PRINTLN
+58        STRING                          \t\t- VARINT <variable_name> or VARINT <variable_name> WITH <integer>
+58        END_OF_STATEMENT                EOS
+59        OUTPUT_WITH_LINE                PRINTLN
+59        STRING                          \t\t- VARSTR <variable_name> or VARSTR <variable_name> WITH <string>
+59        END_OF_STATEMENT                EOS
+60        OUTPUT_WITH_LINE                PRINTLN
+60        STRING                          \t\t- INPUT <variable_name>
+60        END_OF_STATEMENT                EOS
+61        OUTPUT_WITH_LINE                PRINTLN
+61        STRING                          \t\t- STORE <value> IN <variable_name>
+61        END_OF_STATEMENT                EOS
+62        OUTPUT_WITH_LINE                PRINTLN
+62        STRING                          
+62        END_OF_STATEMENT                EOS
+63        END_OF_STATEMENT                EOS
+64        OUTPUT_WITH_LINE                PRINTLN
+64        STRING                          
+64        END_OF_STATEMENT                EOS
+65        OUTPUT_WITH_LINE                PRINTLN
+65        STRING                          ##### ADVANCED OPERATIONS #####
+65        END_OF_STATEMENT                EOS
+66        OUTPUT_WITH_LINE                PRINTLN
+66        STRING                          
+66        END_OF_STATEMENT                EOS
+67        END_OF_STATEMENT                EOS
+68        OUTPUT_WITH_LINE                PRINTLN
+68        STRING                          INTERPOL can accept <expressions> within <expressions>, such that:
+68        END_OF_STATEMENT                EOS
+69        OUTPUT_WITH_LINE                PRINTLN
+69        STRING                          \tFor printing:
+69        END_OF_STATEMENT                EOS
+70        OUTPUT_WITH_LINE                PRINTLN
+70        STRING                          \t\tPRINTLN PRINT <string>
+70        END_OF_STATEMENT                EOS
+71        OUTPUT_WITH_LINE                PRINTLN
+71        STRING                          \tFor math:
+71        END_OF_STATEMENT                EOS
+72        OUTPUT_WITH_LINE                PRINTLN
+72        STRING                          \t\tADD <integer1> ADD <integer1> <integer2>
+72        END_OF_STATEMENT                EOS
+73        OUTPUT_WITH_LINE                PRINTLN
+73        STRING                          \tFor variables:
+73        END_OF_STATEMENT                EOS
+74        OUTPUT_WITH_LINE                PRINTLN
+74        STRING                          \t\tVARINT <variable_name> WITH ADD <integer1> <integer2>
+74        END_OF_STATEMENT                EOS
+75        OUTPUT_WITH_LINE                PRINTLN
+75        STRING                          
+75        END_OF_STATEMENT                EOS
+76        END_OF_STATEMENT                EOS
+77        PROGRAM_END                     END
+78        END_OF_FILE                     EOF
+
+================= SYMBOLS TABLE =================
+
+VARIABLE NAME       TYPE        VALUE
+name                STRING      Juan
+
+======== INTERPOL INTERPRETER TERMINATED ========

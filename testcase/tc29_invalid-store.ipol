@@ -1,0 +1,12 @@
+BEGIN
+STORE this
+STORE that IN this
+STORE "hey" IN there
+STORE 1 IN there
+
+VARSTR foo
+STORE 1 IN foo
+
+VARINT bar
+STORE "hey" IN bar
+END

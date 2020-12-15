@@ -1,0 +1,6 @@
+BEGIN
+PRINT Hello
+PRINTLN Hello
+PRINT Hello world
+PRINTLN Hello world
+END

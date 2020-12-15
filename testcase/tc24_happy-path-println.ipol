@@ -1,0 +1,4 @@
+BEGIN
+PRINTLN "Hello, world!"
+PRINTLN "Welcome to INTERPOL."
+END

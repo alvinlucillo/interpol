@@ -4,7 +4,8 @@ Enter INTERPOL file (.ipol):
 ================ INTERPOL OUTPUT ================
 
 ----------------  OUTPUT START  ---------------->
-
+Invalid arithmetic operation at line number [ 3 ]
+ ----> ROOT x 1
 <----------------- OUTPUT END -------------------
 
 ========= INTERPOL LEXEMES/TOKENS TABLE =========
@@ -14,13 +15,16 @@ LINE NO.  TOKENS                          LEXEMES
 1         END_OF_STATEMENT                EOS
 2         DECLARATION_INT                 VARINT
 2         IDENTIFIER                      x
+2         DECLARATION_ASSIGN_WITH_KEY     WITH
+2         NUMBER                          0
 2         END_OF_STATEMENT                EOS
-3         PROGRAM_END                     END
-4         END_OF_FILE                     EOF
+3         ADVANCED_OPERATOR_ROOT          ROOT
+3         IDENTIFIER                      x
+3         NUMBER                          1
 
 ================= SYMBOLS TABLE =================
 
 VARIABLE NAME       TYPE        VALUE
-x                   INTEGER     
+x                   INTEGER     0
 
 ======== INTERPOL INTERPRETER TERMINATED ========

@@ -1,0 +1,57 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): 
+================ INTERPOL OUTPUT ================
+
+----------------  OUTPUT START  ---------------->
+
+<----------------- OUTPUT END -------------------
+
+========= INTERPOL LEXEMES/TOKENS TABLE =========
+
+LINE NO.  TOKENS                          LEXEMES
+1         PROGRAM_BEGIN                   BEGIN
+1         END_OF_STATEMENT                EOS
+2         BASIC_OPERATOR_ADD              ADD
+2         NUMBER                          1
+2         NUMBER                          0
+2         END_OF_STATEMENT                EOS
+3         BASIC_OPERATOR_SUB              SUB
+3         NUMBER                          3
+3         NUMBER                          1
+3         END_OF_STATEMENT                EOS
+4         BASIC_OPERATOR_MUL              MUL
+4         NUMBER                          1
+4         NUMBER                          3
+4         END_OF_STATEMENT                EOS
+5         BASIC_OPERATOR_DIV              DIV
+5         NUMBER                          8
+5         NUMBER                          2
+5         END_OF_STATEMENT                EOS
+6         BASIC_OPERATOR_MOD              MOD
+6         NUMBER                          17
+6         NUMBER                          12
+6         END_OF_STATEMENT                EOS
+7         ADVANCED_OPERATOR_EXP           RAISE
+7         NUMBER                          2
+7         NUMBER                          2
+7         END_OF_STATEMENT                EOS
+8         ADVANCED_OPERATOR_ROOT          ROOT
+8         NUMBER                          3
+8         NUMBER                          27
+8         END_OF_STATEMENT                EOS
+9         ADVANCED_OPERATOR_DIST          DIST
+9         NUMBER                          3
+9         NUMBER                          4
+9         DISTANCE_SEPARATOR              AND
+9         NUMBER                          1
+9         NUMBER                          2
+9         END_OF_STATEMENT                EOS
+10        ADVANCED_OPERATOR_AVE           MEAN
+10        NUMBER                          1
+10        NUMBER                          2
+10        END_OF_STATEMENT                EOS
+11        PROGRAM_END                     END
+12        END_OF_FILE                     EOF
+
+======== INTERPOL INTERPRETER TERMINATED ========

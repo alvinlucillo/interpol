@@ -1,0 +1,33 @@
+========  INTERPOL INTERPRETER STARTED   ========
+
+Enter INTERPOL file (.ipol): 
+================ INTERPOL OUTPUT ================
+
+----------------  OUTPUT START  ---------------->
+HEY
+Invalid syntax at line number [ 11 ]
+ ----> END
+<----------------- OUTPUT END -------------------
+
+========= INTERPOL LEXEMES/TOKENS TABLE =========
+
+LINE NO.  TOKENS                          LEXEMES
+1         PROGRAM_BEGIN                   BEGIN
+1         END_OF_STATEMENT                EOS
+2         END_OF_STATEMENT                EOS
+3         PROGRAM_BEGIN                   BEGIN
+3         END_OF_STATEMENT                EOS
+4         END_OF_STATEMENT                EOS
+5         PROGRAM_BEGIN                   BEGIN
+5         END_OF_STATEMENT                EOS
+6         END_OF_STATEMENT                EOS
+7         OUTPUT                          PRINT
+7         STRING                          HEY
+7         END_OF_STATEMENT                EOS
+8         END_OF_STATEMENT                EOS
+9         PROGRAM_END                     END
+9         END_OF_STATEMENT                EOS
+10        END_OF_STATEMENT                EOS
+11        PROGRAM_END                     END
+
+======== INTERPOL INTERPRETER TERMINATED ========
